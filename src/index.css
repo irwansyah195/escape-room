@@ -190,6 +190,58 @@ h1, h2, h3, .brand-font {
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
+/* Baris judul studi kasus */
+.scenario-title-line {
+  font-weight: 800;
+  font-size: 0.97em;
+  color: var(--purple);
+  letter-spacing: 0.01em;
+  margin: 0 0 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 1.5px dashed #e0d6f5;
+  text-align: left;
+}
+
+/* Sub-baris biasa (keterangan singkat) */
+.scenario-sub {
+  margin: 0 0 8px 0;
+  color: #4a5568;
+  font-style: italic;
+  font-size: 0.95em;
+  text-align: left;
+}
+
+/* Blok bullet area */
+.scenario-bullet {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 12px 0;
+  padding: 10px 14px;
+  background: #fafafa;
+  border-radius: 8px;
+  border-left: 3px solid var(--yellow);
+}
+
+/* Label area: "● Area 1 (Seni Kriya):" */
+.scenario-bullet-label {
+  font-weight: 700;
+  color: #5a3e9b;
+  font-size: 0.97em;
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* Isi narasi area */
+.scenario-bullet-body {
+  display: block;
+  text-align: justify;
+  line-height: 1.72;
+  color: #2c3244;
+  font-size: 0.98em;
+}
+
+
 /* Lock Items */
 .lock-wrapper {
   margin-bottom: 24px;

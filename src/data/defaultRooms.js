@@ -1,163 +1,248 @@
 export const defaultRooms = [
+  // ─────────────────────────────────────────────
+  // RUANGAN 1 — Area 1 & 2 (Soal 1–4)
+  // ─────────────────────────────────────────────
   {
     id: "room-1",
-    title: "Ruang Balok",
-    icon: "🧱",
-    decor: "🧱",
-    text: `Rani (4 tahun) duduk di sudut ruang kelas bersama Dimas (4 tahun). Keduanya memiliki set balok kayu masing-masing. Rani sesekali melirik menara yang dibangun Dimas dan berkata, "Punyaku lebih tinggi lho," lalu kembali fokus menyusun baloknya sendiri. Mereka berdua duduk berdekatan, sesekali bertukar potongan balok berwarna merah, tetapi masing-masing membangun struktur yang berbeda dan tidak ada rencana bersama.`,
+    title: "Seni Kriya & Eksplorasi",
+    icon: "🎨",
+    decor: "🎨",
+    text: `STUDI KASUS OBSERVASI: KELAS SENTRA EKSPLORASI "BINTANG KECIL"\nGuru Rina merancang kegiatan sentra untuk menstimulasi kreativitas anak usia 4-5 tahun.\n\n● Area 1 (Seni Kriya): Guru Rina mengadakan kegiatan "Membuat Kupu-kupu". Ia telah mengguntingkan kertas karton berbentuk sayap, badan, dan antena dengan presisi. Anak-anak diinstruksikan menempelkan bagian-bagian tersebut menggunakan lem sesuai contoh. Saat kegiatan berlangsung, Budi menempelkan sayap secara asimetris dan menaruh mata di bawah badan. Guru Rina berkata, "Wah, Budi salah tempel, yuk dipindah matanya ke atas biar mirip kupu-kupu sungguhan."\n\n● Area 2 (Bahan Alam/Loose Parts): Tersedia nampan berisi batu kerikil, ranting, kancing, dan daun kering tanpa instruksi spesifik. Siti mengabaikan contoh bentuk bunga yang dibuat guru, lalu menyusun batu dan ranting memanjang hingga keluar nampan sambil berkata, "Ini rel kereta api ajaib yang mau pergi ke bulan!"`,
     key: "🟦",
     locks: [
       {
         id: "lock-1-1",
-        q: "Gembok 1 — Jenis bermain berdasarkan fungsi (Hurlock):",
+        q: "Berdasarkan prinsip perkembangan kreativitas, evaluasi pedagogis yang paling tepat untuk kegiatan di Area 1 (Membuat Kupu-kupu) adalah...",
         options: [
-          "Bermain aktif — anak mengikuti instruksi guru dalam menyusun balok bertahap",
-          "Bermain aktif — anak terlibat langsung menyusun dan mengatur baloknya sendiri",
-          "Bermain pasif — anak hanya menikmati hasil susunan balok milik temannya"
+          "Kegiatan tersebut sangat ideal karena melatih anak memecahkan masalah (problem solving) secara mandiri.",
+          "Kegiatan tersebut termasuk Seni Proses (Process Art) yang merangsang pemikiran divergen anak.",
+          "Kegiatan tersebut tergolong Seni Produk (Product Art) yang lebih menguji tingkat kepatuhan dan kemampuan meniru anak daripada kreativitasnya.",
+          "Kegiatan tersebut efektif mengembangkan imajinasi spasial karena anak harus membayangkan bentuk asli kupu-kupu."
         ],
-        correct: 1,
-        hint: "Perhatikan siapa yang benar-benar memegang dan menyusun balok, serta apakah ada arahan dari orang dewasa dalam narasi."
+        correct: 2,
+        hint: "Perhatikan siapa yang menyiapkan pola, dan apakah anak bebas berekspresi atau harus mengikuti hasil akhir yang sudah ditentukan guru."
       },
       {
         id: "lock-1-2",
-        q: "Gembok 2 — Tahap bermain menurut Parten:",
+        q: "Tindakan Guru Rina yang mengoreksi hasil tempelan Budi (\"Budi salah tempel...\") mencerminkan kesalahan umum pendidik, karena respons tersebut berpotensi...",
         options: [
-          "Parallel play — anak duduk berdampingan namun membangun struktur masing-masing",
-          "Associative play — anak bermain bahan yang sama demi tujuan bersama",
-          "Onlooker play — anak hanya mengamati temannya menyusun balok"
+          "Mengembangkan pemahaman kognitif anak tentang anatomi serangga secara akurat.",
+          "Mematikan kebebasan berekspresi anak karena standar estetika dibatasi oleh sudut pandang realita orang dewasa.",
+          "Melatih kedisiplinan anak dalam mengikuti instruksi berurutan (SOP) di dalam kelas.",
+          "Mendorong Budi untuk mengeksplorasi bahan lain agar kupu-kupunya lebih menarik."
         ],
-        correct: 0,
-        hint: "Cek apakah ada rencana/tujuan yang disepakati bersama, atau apakah keduanya justru membangun struktur yang berbeda."
+        correct: 1,
+        hint: "Pikirkan: apakah 'salah' dalam seni anak harus selalu dikoreksi menuju realita versi orang dewasa? Apa dampaknya pada ekspresi diri anak?"
       },
       {
         id: "lock-1-3",
-        q: "Gembok 3 — Jenis bermain kognitif (Piaget–Smilansky):",
+        q: "Menganalisis perilaku Siti di Area 2 saat bermain loose parts, fenomena psikologis apa yang sedang ditunjukkan oleh anak tersebut?",
         options: [
-          "Constructive play — bahan disusun menjadi bentuk tertentu sesuai rancangan anak",
-          "Functional play — gerakan tubuh diulang tanpa membentuk sesuatu yang jelas",
-          "Games with rules — anak menaati aturan giliran yang disepakati bersama"
+          "Siti mengalami kebingungan instruksional sehingga membutuhkan demonstrasi ulang dari guru.",
+          "Siti menunjukkan tahapan pemikiran divergent, di mana benda tidak terstruktur berhasil ia beri makna baru melalui imajinasinya.",
+          "Siti menunjukkan kurangnya rentang konsentrasi (attention span) karena keluar dari batas nampan yang disediakan.",
+          "Siti sedang berada dalam fase egosentris karena menolak bekerja sama membuat bunga seperti temannya."
         ],
-        correct: 0,
-        hint: "Perhatikan hasil akhirnya: apakah balok berubah menjadi sebuah bentuk (misalnya menara), atau hanya gerakan berulang tanpa hasil bentuk."
+        correct: 1,
+        hint: "Perhatikan bahwa bahan di Area 2 memang sengaja tidak memiliki instruksi spesifik. Apa yang terjadi saat anak diberi kebebasan penuh dengan bahan terbuka (loose parts)?"
       },
       {
         id: "lock-1-4",
-        q: "Gembok 4 — Fungsi perkembangan yang paling menonjol dalam skenario ini:",
+        q: "Jika Anda harus merombak kegiatan di Area 1 agar murni menjadi pendekatan Seni Proses (Process Art), instruksi dan persiapan apa yang paling tepat diberikan?",
         options: [
-          "Bahasa reseptif — anak lebih banyak mendengarkan ucapan temannya",
-          "Motorik halus dan kesadaran sosial awal lewat perbandingan hasil karya",
-          "Pemahaman moral kompleks tentang benar dan salah"
+          "Menyediakan kertas, cat, krayon, spons, dan berkata: \"Anak-anak, hari ini kita bereksplorasi dengan alat-alat ini. Kalian boleh membuat apa saja yang kalian bayangkan.\"",
+          "Memberikan pola kupu-kupu yang lebih besar agar anak yang motorik halusnya belum matang lebih mudah menempel.",
+          "Menambahkan nomor urut (1, 2, 3) di belakang potongan kertas agar anak bisa menempel secara logis dan terstruktur.",
+          "Meminta anak mewarnai pola kupu-kupu yang sudah diprint di atas kertas menggunakan krayon sebelum mereka gunting."
         ],
-        correct: 1,
-        hint: "Perhatikan dua hal: tindakan tangan menyusun balok, dan ucapan Rani yang membandingkan tinggi menara — bukan sekadar mendengarkan atau menilai moral."
+        correct: 0,
+        hint: "Seni Proses berpusat pada kebebasan eksplorasi bahan tanpa hasil akhir yang ditentukan. Manakah pilihan yang tidak memberikan target bentuk spesifik kepada anak?"
       }
     ]
   },
+
+  // ─────────────────────────────────────────────
+  // RUANGAN 2 — Area 3 & 4 (Soal 5–8)
+  // ─────────────────────────────────────────────
   {
     id: "room-2",
-    title: "Dokter-dokteran",
-    icon: "🩺",
-    decor: "🩺",
-    text: `Sekelompok anak usia 5 tahun (Aisyah, Bima, dan Citra) bermain di sudut dramatik. Aisyah berperan sebagai dokter, Bima sebagai pasien yang berpura-pura sakit perut, dan Citra sebagai perawat yang menyiapkan "obat" dari plastisin. Mereka menyepakati alur cerita: pasien datang, diperiksa, diberi obat, lalu pulang. Ketika Bima ingin mengubah jalan cerita, Aisyah berkata, "Jangan gitu, kan tadi kamu sakit perut, harus nunggu dulu."`,
+    title: "Sensori & Bermain Peran",
+    icon: "🎭",
+    decor: "🎭",
+    text: `STUDI KASUS OBSERVASI: KELAS SENTRA EKSPLORASI "BINTANG KECIL"\nGuru Rina merancang kegiatan sentra untuk menstimulasi kreativitas anak usia 4-5 tahun.\n\n● Area 3 (Sensory Play): Guru menyiapkan finger painting (melukis jari) dengan cat air bertekstur kental. Caca menolak memasukkan tangannya dan mulai menangis saat ujung jarinya tak sengaja terkena cat, ia berteriak, "Kotor! Caca jijik!" Guru Rina segera membawa Caca ke wastafel, mencuci tangannya bersih-bersih, lalu memberikan kertas dan krayon agar Caca tetap bisa menggambar dengan "bersih".\n\n● Area 4 (Bermain Peran/Dramatic Play): Tiga anak sedang bermain "Restoran". Anton mengambil sebuah balok kayu persegi panjang, menempelkannya ke telinga, dan pura-pura menelepon untuk memesan ayam goreng. Melihat hal itu, Guru Rina mengambilkan mainan telepon plastik dari rak dan memberikannya pada Anton sambil berkata, "Anton, kalau mau telepon pakai ini ya, balok kayu kan untuk dibangun, bukan untuk telepon."`,
     key: "🟥",
     locks: [
       {
         id: "lock-2-1",
-        q: "Gembok 1 — Jenis bermain berdasarkan fungsi (Hurlock):",
+        q: "Tindakan Guru Rina di Area 3 (memberikan krayon pada Caca) sepintas terlihat solutif. Namun, dari perspektif perkembangan eksplorasi anak, tindakan ini dianggap kurang tepat karena...",
         options: [
-          "Bermain pasif — anak-anak mengikuti skrip cerita yang sudah disusun guru",
-          "Bermain aktif — ketiga anak berperan langsung dan mengatur alur ceritanya sendiri",
-          "Bermain aktif — hanya satu anak yang bermain, dua lainnya menonton di sudut"
+          "Caca menjadi tidak disiplin dalam menggunakan bahan cat air sesuai jadwal.",
+          "Guru menghilangkan kesempatan anak untuk secara bertahap menoleransi stimulasi taktil (sentuhan) yang penting untuk keberanian bereksplorasi.",
+          "Krayon tidak bisa melatih motorik halus sebaik cat air.",
+          "Caca seharusnya dipaksa memasukkan seluruh tangannya agar langsung berani menghadapi ketakutannya."
         ],
         correct: 1,
-        hint: "Cek siapa yang benar-benar berperan dan berdialog, serta apakah alur ceritanya muncul dari anak-anak sendiri atau dari arahan guru."
+        hint: "Bukan soal alat mana yang lebih baik, melainkan: apa yang terlewatkan dari perkembangan Caca saat guru langsung menghindari sumber ketakutannya?"
       },
       {
         id: "lock-2-2",
-        q: "Gembok 2 — Tahap bermain menurut Parten:",
+        q: "Intervensi (scaffolding) yang paling ideal untuk memfasilitasi Caca di Area 3 tanpa mematikan proses adaptasi sensoriknya adalah...",
         options: [
-          "Cooperative play — ada pembagian peran dan alur cerita yang disepakati bersama",
-          "Associative play — anak bermain barang yang sama tanpa pembagian peran jelas",
-          "Parallel play — anak duduk berdekatan namun memainkan cerita masing-masing"
+          "Membiarkan Caca duduk diam mengamati teman-temannya di pojok ruangan sampai ia bosan.",
+          "Memberikan alat bantu jarak jauh (seperti kuas basah atau spons beralas) terlebih dahulu, atau guru mencontohkan menyentuh cat dengan satu jari secara menyenangkan.",
+          "Mengurangi nilai catatan anekdotal Caca karena menolak berpartisipasi dalam kegiatan seni.",
+          "Mengalihkan Caca ke Area 1 agar ia mengerjakan menempel kertas yang lebih bersih."
         ],
-        correct: 0,
-        hint: "Perhatikan apakah ada pembagian peran (dokter, pasien, perawat) dan apakah Aisyah menegakkan aturan cerita yang disepakati bersama."
+        correct: 1,
+        hint: "Scaffolding yang baik tidak memaksa dan tidak pula menghindarkan. Manakah pilihan yang memberi anak 'jembatan' menuju pengalaman yang ia takuti, secara bertahap dan aman?"
       },
       {
         id: "lock-2-3",
-        q: "Gembok 3 — Jenis bermain menurut Piaget–Smilansky:",
+        q: "Saat Anton menggunakan balok kayu sebagai telepon di Area 4, ia sebenarnya sedang menunjukkan kemampuan kognitif tingkat tinggi, yaitu...",
         options: [
-          "Constructive play — anak menyusun properti dokter-dokteran menjadi bentuk tertentu",
-          "Sociodramatic play — anak memerankan tokoh dan berdialog sesuai peran bersama",
-          "Functional play — anak mengulang gerakan memeriksa pasien tanpa alur cerita"
+          "Subtitusi objek dalam bermain simbolik (symbolic play), di mana fungsi sebuah benda diubah sesuai imajinasi dan kebutuhan narasi anak.",
+          "Berpikir konkret, di mana ia hanya bisa memahami fungsi sebuah balok jika dimainkan bersama temannya.",
+          "Kebingungan perseptual karena penglihatan spasialnya belum bisa membedakan mana mainan telepon dan mana kayu.",
+          "Keterlambatan linguistik karena ia menggunakan benda mati untuk berkomunikasi alih-alih berbicara langsung."
         ],
-        correct: 1,
-        hint: "Fokus pada dialog, peran yang dimainkan, dan negosiasi alur cerita antar anak — bukan sekadar menyusun benda atau gerakan berulang."
+        correct: 0,
+        hint: "Anton tahu bahwa balok itu bukan telepon sungguhan — namun ia memilih menjadikannya telepon dalam narasi bermainnya. Kemampuan apa yang memungkinkan anak melakukan hal ini?"
       },
       {
         id: "lock-2-4",
-        q: "Gembok 4 — Fungsi perkembangan yang paling menonjol dalam skenario ini:",
+        q: "Apa dampak pedagogis yang merugikan dari tindakan Guru Rina saat ia menukar balok kayu Anton dengan telepon plastik tiruan?",
         options: [
-          "Motorik kasar — anak-anak banyak bergerak berpindah peran dan posisi",
-          "Bahasa ekspresif, pemahaman peran sosial, dan regulasi diri lewat konsistensi cerita",
-          "Kemampuan berhitung — anak-anak menghitung jumlah obat yang diberikan"
+          "Membuat permainan restoran menjadi terlalu rapi dan tidak natural.",
+          "Meningkatkan perbendaharaan kata Anton tentang nama-nama alat komunikasi modern.",
+          "Menurunkan risiko balok kayu rusak atau kotor karena dipakai bermain peran.",
+          "Mematikan kemampuan berpikir abstrak Anton, karena guru memaksakan realitas benda konkret (harus mirip aslinya) ke dalam dunia imajinasi anak."
         ],
-        correct: 1,
-        hint: "Perhatikan dialog antar anak, pembagian peran, dan cara Aisyah mempertahankan alur cerita agar tetap masuk akal bagi Bima."
+        correct: 3,
+        hint: "Dalam symbolic play, nilai terbesar justru ada pada kemampuan anak 'mengubah' sesuatu yang tidak mirip menjadi bermakna. Apa yang hilang saat guru memaksa benda 'harus mirip aslinya'?"
       }
     ]
   },
+
+  // ─────────────────────────────────────────────
+  // RUANGAN 3 — Area 5 & 6 (Soal 9–12)
+  // ─────────────────────────────────────────────
   {
     id: "room-3",
-    title: "Congklak di Halaman",
-    icon: "🎲",
-    decor: "🎲",
-    text: `Sekelompok anak usia 6 tahun bermain congklak saat istirahat. Mereka bergiliran mengambil biji, menghitung langkah dengan teliti, dan salah satu anak mengingatkan, "Bukan gitu caranya, biji terakhir harus masuk lumbung dulu baru boleh ambil lagi." Anak yang lain menerima koreksi tersebut dan melanjutkan permainan sesuai aturan yang disepakati bersama.`,
+    title: "Konstruksi & Sains Eksploratif",
+    icon: "🔬",
+    decor: "🔬",
+    text: `STUDI KASUS OBSERVASI: KELAS SENTRA EKSPLORASI "BINTANG KECIL"\nGuru Rina merancang kegiatan sentra untuk menstimulasi kreativitas anak usia 4-5 tahun.\n\n● Area 5 (Balok Konstruksi): Tio dan Raka sedang menyusun balok kayu untuk membuat "Menara Langit". Sayangnya, setiap kali mencapai tumpukan kelima, menara itu selalu roboh. Tio mulai frustrasi dan ingin menyerah. Guru Rina datang, mengambil alih balok tersebut, dan menyusunkannya menjadi menara yang kokoh sambil berkata, "Nah, susun balok besarnya di bawah ya. Selesai! Menaranya sudah tidak jatuh lagi, kalian senang kan?"\n\n● Area 6 (Sains Eksploratif): Guru menyiapkan tiga gelas berisi air warna primer (merah, kuning, biru). Mia tidak sengaja menuangkan air kuning ke dalam gelas biru sehingga air berubah menjadi hijau. Mia takjub dan berseru, "Ibu Guru, lihat! Airnya berubah jadi jus daun!" Guru Rina segera mengoreksi, "Bukan jus daun, Mia. Itu warna hijau. Kalau mau buat jus daun, kita pakai daun sungguhan di luar."`,
     key: "🟩",
     locks: [
       {
         id: "lock-3-1",
-        q: "Gembok 1 — Jenis bermain berdasarkan fungsi (Hurlock):",
+        q: "Di Area 5, intervensi Guru Rina yang langsung menyusunkan balok untuk Tio dan Raka berdampak sangat buruk bagi proses kognitif anak karena...",
         options: [
-          "Bermain pasif — anak-anak menonton giliran temannya tanpa ikut mengambil biji",
-          "Bermain aktif — setiap anak ikut mengambil biji dan menjalankan giliran sendiri",
-          "Bermain aktif — anak-anak hanya mengikuti arahan guru di setiap langkahnya"
+          "Anak-anak menjadi malas merapikan balok kayu kembali ke tempatnya.",
+          "Guru mematikan kesempatan anak untuk melakukan trial and error (uji coba) dan mematikan nalar pemecahan masalah (problem solving).",
+          "Susunan balok buatan guru tidak sesuai dengan kurikulum arsitektur dasar.",
+          "Anak-anak akan menangis karena menaranya tidak dibuat lebih tinggi lagi."
         ],
         correct: 1,
-        hint: "Cek apakah setiap anak benar-benar ikut bermain dan menjalankan aturan sendiri, atau hanya menonton atau mengikuti arahan orang dewasa."
+        hint: "Frustasi saat menara roboh adalah bagian dari proses belajar. Apa yang Tio dan Raka kehilangan saat guru langsung 'menyelesaikan' masalah untuk mereka?"
       },
       {
         id: "lock-3-2",
-        q: "Gembok 2 — Jenis bermain menurut Piaget–Smilansky:",
+        q: "Berdasarkan teori Zone of Proximal Development (Vygotsky), bentuk scaffolding (pijakan) melalui pertanyaan terbuka (open-ended question) yang seharusnya digunakan guru di Area 5 adalah...",
         options: [
-          "Constructive play — anak menyusun biji congklak menjadi pola tertentu",
-          "Games with rules — anak menjalankan aturan baku dan giliran yang disepakati bersama",
-          "Sociodramatic play — anak memerankan tokoh penjual dan pembeli biji congklak"
+          "\"Ayo, siapa yang bisa meniru gambar menara di buku ini?\"",
+          "\"Wah sayang roboh, yuk main puzzle saja di meja sebelah agar tidak sedih.\"",
+          "\"Kira-kira kenapa ya menaranya terus jatuh saat tinggi? Apa yang bisa kita ubah di bagian dasarnya biar lebih kuat?\"",
+          "\"Jangan ditaruh di situ baloknya! Yang panjang di bawah!\""
         ],
-        correct: 1,
-        hint: "Perhatikan adanya aturan tetap (biji terakhir masuk lumbung), giliran yang diatur, dan koreksi aturan yang diterima bersama."
+        correct: 2,
+        hint: "ZPD Vygotsky berarti memberi bantuan yang memancing anak berpikir sendiri — bukan memberi jawaban, bukan mengalihkan, dan bukan memerintah. Manakah yang memancing refleksi dan eksplorasi?"
       },
       {
         id: "lock-3-3",
-        q: "Gembok 3 — Dibanding Skenario 1 (Rani & Dimas), dari sisi tahap sosial Parten, permainan congklak ini menunjukkan:",
+        q: "Pada Area 6, respons Guru Rina terhadap penemuan Mia (\"jus daun\") mencerminkan kegagalan pendidik dalam...",
         options: [
-          "Tahap sosial yang setara, karena keduanya sama-sama melibatkan lebih dari satu anak",
-          "Tahap sosial yang lebih matang, karena melibatkan aturan formal yang disepakati bersama",
-          "Tahap sosial yang lebih rendah, karena anak hanya fokus pada bijinya masing-masing"
+          "Mengajarkan sains eksak tentang pencampuran warna sekunder dengan tepat.",
+          "Menghargai proses inkuiri (inquiry) dan kemampuan metafora kreatif yang diciptakan anak dari imajinasinya.",
+          "Mencegah anak minum air kotor karena dikira jus daun sungguhan.",
+          "Mengajarkan kosakata bahasa Indonesia baku yang baik dan benar."
         ],
         correct: 1,
-        hint: "Bandingkan apakah ada tujuan/aturan bersama yang disepakati dan ditegakkan, dibanding skenario 1 yang belum memiliki hal tersebut."
+        hint: "Mia menyebut 'jus daun' bukan karena salah, melainkan karena imajinasinya menghubungkan warna hijau dengan daun. Apa yang sebetulnya berharga dan terlewat dari momen itu?"
       },
       {
         id: "lock-3-4",
-        q: "Gembok 4 — Fungsi perkembangan yang paling menonjol dalam skenario ini:",
+        q: "Mengapa peristiwa ketidaksengajaan Mia mencampur warna di Area 6 jauh lebih efektif untuk menumbuhkan jiwa inovator dibandingkan menghafal rumus warna (Biru + Kuning = Hijau)?",
         options: [
-          "Motorik kasar — anak-anak banyak bergerak mengambil biji dari lumbung",
-          "Bahasa ekspresif — anak-anak banyak berdialog selama permainan berlangsung",
-          "Kontrol diri menunggu giliran serta ketelitian berhitung dan pemahaman aturan"
+          "Karena Mia bisa bermain air lebih lama daripada teman-temannya.",
+          "Karena lembar kerja mewarnai membutuhkan biaya cetak (print) yang mahal.",
+          "Karena anak mengalami sendiri (hands-on experience) proses sebab-akibat melalui eksplorasi otonom yang memicu rasa ingin tahu alami.",
+          "Karena anak-anak usia dini belum bisa membaca huruf sehingga tidak bisa menghafal."
         ],
         correct: 2,
-        hint: "Perhatikan cara anak menunggu giliran, menghitung biji dengan teliti, dan menerima koreksi aturan dari temannya."
+        hint: "Pikirkan perbedaan antara 'mengetahui sesuatu karena diberitahu' vs 'menemukan sendiri secara tidak sengaja'. Mana yang lebih membekas dan memantik rasa ingin tahu?"
+      }
+    ]
+  },
+
+  // ─────────────────────────────────────────────
+  // RUANGAN 4 — Area 7, 8 & Kesimpulan (Soal 13–16)
+  // ─────────────────────────────────────────────
+  {
+    id: "room-4",
+    title: "Motivasi, Lingkungan & Peran Guru",
+    icon: "⭐",
+    decor: "⭐",
+    text: `STUDI KASUS OBSERVASI: KELAS SENTRA EKSPLORASI "BINTANG KECIL"\nGuru Rina merancang kegiatan sentra untuk menstimulasi kreativitas anak usia 4-5 tahun.\n\n● Area 7 (Melukis Bebas & Motivasi): Dodi menunjukkan lukisannya yang penuh coretan abstrak tebal kepada Guru Rina. Guru Rina memberinya stiker bintang besar dan berkata, "Wah, lukisan Dodi paling bagus di kelas! Gambar kamu selalu rapi. Besok bikin yang persis seperti ini lagi ya, biar dapat stiker bintang lagi!"\n\n● Area 8 (Lingkungan/Display Kelas): Saat melihat ke dinding kelas, Anda menyadari bahwa Guru Rina memajang 15 gambar "Bunga Matahari" hasil karya seluruh murid. Semua gambar tersebut memiliki bentuk kelopak, jumlah daun, dan warna (kuning dan hijau) yang 100% sama persis satu sama lain (berasal dari lembar kerja yang diwarnai).`,
+    key: "🏆",
+    locks: [
+      {
+        id: "lock-4-1",
+        q: "Di Area 7, Guru Rina memberikan stiker bintang dan pujian \"paling bagus\". Risiko pedagogis jangka panjang dari pujian ekstrinsik semacam ini terhadap kreativitas anak adalah...",
+        options: [
+          "Meningkatkan motivasi intrinsik anak untuk mencoba gaya melukis yang lebih rumit.",
+          "Mendorong anak lain untuk merebut stiker milik Dodi.",
+          "Membuat anak terobsesi pada reward (hadiah), sehingga ia takut mengambil risiko berkreasi hal baru karena takut gagal mendapat \"bintang\" lagi.",
+          "Melatih Dodi menjadi pelukis profesional yang disiplin sejak usia balita."
+        ],
+        correct: 2,
+        hint: "Jika sumber motivasi berasal dari luar (stiker/pujian guru), apa yang terjadi saat hadiah itu tidak ada lagi? Dan apakah anak akan berani bereksperimen jika takut 'salah' dan tidak mendapat hadiah?"
+      },
+      {
+        id: "lock-4-2",
+        q: "Alih-alih memuji hasil akhir dengan kata \"paling bagus/rapi\", kalimat apresiasi berbasis proses (process-praise) yang ideal untuk memantik kreativitas Dodi di Area 7 adalah...",
+        options: [
+          "\"Kamu memang murid jenius, Dodi! Ibu bangga padamu.\"",
+          "\"Wah, lukisanmu bagus sekali seperti buatan seniman terkenal!\"",
+          "\"Ibu lihat lukisanmu tidak ada yang keluar garis sama sekali, hebat!\"",
+          "\"Ibu perhatikan Dodi mencampur banyak sekali warna tebal di bagian ini. Boleh ceritakan pada Ibu apa yang sedang kamu gambar?\""
+        ],
+        correct: 3,
+        hint: "Process-praise fokus pada APA yang anak lakukan (pilihan warna, teknik, usaha), bukan SIAPA anak itu atau seberapa bagus hasilnya. Manakah yang memancing anak merefleksikan prosesnya sendiri?"
+      },
+      {
+        id: "lock-4-3",
+        q: "Memajang 15 karya seni yang bentuk dan warnanya sama persis di Area 8 (dinding kelas) secara tidak langsung menanamkan hidden curriculum (kurikulum tersembunyi) kepada murid-murid bahwa...",
+        options: [
+          "Keberagaman ide dan kebebasan berekspresi sangat dijunjung tinggi di sekolah tersebut.",
+          "Keseragaman (konformitas), kepatuhan, dan hasil akhir (produk) jauh lebih bernilai daripada proses orisinalitas pemikiran individu.",
+          "Anak-anak di kelas tersebut memiliki tingkat kecerdasan motorik halus yang merata.",
+          "Lingkungan tersebut sudah menggunakan pendekatan sentra Reggio Emilia yang berpusat pada minat anak."
+        ],
+        correct: 1,
+        hint: "Bayangkan Anda adalah murid yang melihat dinding itu. Pesan tersirat apa yang Anda tangkap tentang apa yang 'benar' dan apa yang 'dihargai' di kelas ini?"
+      },
+      {
+        id: "lock-4-4",
+        q: "(Kesimpulan Keseluruhan). Jika Anda harus menyimpulkan peran ideal seorang pendidik PAUD berdasarkan seluruh observasi di Area 1 hingga Area 8, guru seharusnya berperan sebagai...",
+        options: [
+          "Instruktur tunggal yang memastikan semua karya anak indah, rapi, dan layak dipamerkan kepada orang tua.",
+          "Pengamat pasif yang membiarkan kelas berantakan tanpa ada aturan sama sekali demi kebebasan anak.",
+          "Fasilitator yang menyediakan lingkungan kaya stimulasi, memberi ruang aman untuk membuat kesalahan, dan tidak memaksakan standar estetika/realita orang dewasa pada proses berpikir anak.",
+          "Hakim penilai yang memberikan skor objektif berdasarkan seberapa cepat anak menyelesaikan tugasnya."
+        ],
+        correct: 2,
+        hint: "Dari 8 area yang diobservasi, di mana anak paling berkembang: saat guru mengontrol penuh, atau saat guru memberi ruang aman dan stimulasi tanpa memaksakan hasil akhir?"
       }
     ]
   }

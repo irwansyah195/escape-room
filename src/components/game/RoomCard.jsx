@@ -50,7 +50,27 @@ export default function RoomCard({
       </div>
 
       <div className="scenario-box">
-        {room.text}
+        {room.text.split('\n').map((line, i) => {
+          if (i === 0) {
+            // Baris judul: STUDI KASUS OBSERVASI: ...
+            return <p key={i} className="scenario-title-line">{line}</p>;
+          }
+          if (line.startsWith('●')) {
+            // Baris area: ● Area X (...)
+            const colonIdx = line.indexOf(':');
+            const label = colonIdx !== -1 ? line.slice(0, colonIdx + 1) : line;
+            const body  = colonIdx !== -1 ? line.slice(colonIdx + 1).trim() : '';
+            return (
+              <div key={i} className="scenario-bullet">
+                <span className="scenario-bullet-label">{label}</span>
+                {body && <span className="scenario-bullet-body">{body}</span>}
+              </div>
+            );
+          }
+          if (line.trim() === '') return null;
+          // Baris biasa (sub-judul / keterangan)
+          return <p key={i} className="scenario-sub">{line}</p>;
+        })}
       </div>
 
       <div className="locks-container">
