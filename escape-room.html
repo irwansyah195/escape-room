@@ -1,0 +1,1032 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=ai-legible&utm_source=comment&utm_medium=referral&utm_id=4b66b77f-79ae-4334-837e-263eee202311
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="hosting-provider" content="Netlify">
+<meta name="netlify-deploy" content="https://netlify.new/?utm_campaign=ai-legible&amp;utm_source=meta&amp;utm_medium=referral&amp;utm_id=4b66b77f-79ae-4334-837e-263eee202311">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Escape Room: Dunia Bermain Anak</title>
+<style>
+  :root{
+    --pink:#ff6f91; --yellow:#ffd166; --blue:#4d9de0; --green:#59c88f;
+    --purple:#9b6bcc; --dark:#2b2d42; --cream:#fff8ee;
+  }
+  *{box-sizing:border-box;}
+  html{
+    background:linear-gradient(180deg,#cfe9ff 0%,#e8f4ff 32%,#fdf6ea 68%,#ffeef2 100%);
+  }
+  body{
+    margin:0; font-family:'Comic Sans MS','Trebuchet MS',sans-serif;
+    background:linear-gradient(180deg,#cfe9ff 0%,#e8f4ff 32%,#fdf6ea 68%,#ffeef2 100%);
+    background-attachment:fixed;
+    color:var(--dark); min-height:100vh; padding:clamp(10px,4vw,20px);
+    position:relative; overflow-x:hidden;
+  }
+  #skyDecor{
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    z-index:0; pointer-events:none;
+  }
+  .wrap{max-width:820px;margin:0 auto; position:relative; z-index:1; width:100%;}
+  .header{
+    text-align:center; background:linear-gradient(120deg,var(--pink),var(--purple));
+    color:white; padding:clamp(16px,4vw,22px) clamp(12px,4vw,16px); border-radius:24px; box-shadow:0 8px 0 #c94f76;
+    margin-bottom:20px;
+  }
+  .header h1{margin:0 0 6px; font-size:clamp(1.25em,4.5vw,1.8em); line-height:1.25;}
+  .header p{margin:0; opacity:.95; font-size:clamp(.85em,3vw,1em);}
+  .progress{display:flex; gap:8px; justify-content:center; margin:14px 0 20px;}
+  .dot{
+    width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--purple);
+    opacity:.4; transition:.3s;
+  }
+  .dot.active{opacity:1; background:var(--yellow); transform:scale(1.2);}
+  .dot.done{opacity:1; background:var(--green); border-color:var(--green);}
+  .card{
+    background:var(--cream); border-radius:22px; padding:clamp(14px,4.5vw,24px);
+    box-shadow:0 6px 0 rgba(0,0,0,.08), 0 10px 24px rgba(0,0,0,.06);
+    border:3px dashed var(--blue); margin-bottom:18px; position:relative; overflow:hidden;
+  }
+  .room-badge{
+    display:inline-block; background:var(--blue); color:white; padding:6px 16px;
+    border-radius:20px; font-weight:bold; margin-bottom:10px; font-size:clamp(.8em,2.8vw,.9em);
+  }
+  .scenario-title{font-size:clamp(1.1em,4vw,1.3em); color:var(--purple); margin:6px 0 12px;}
+  .scenario-text{
+    background:white; border-radius:16px; padding:clamp(12px,4vw,16px) clamp(12px,4vw,18px); line-height:1.6;
+    border-left:6px solid var(--yellow); margin-bottom:16px; font-size:clamp(.92em,3.2vw,1.02em);
+  }
+  .lock-title{font-weight:bold; color:var(--dark); margin:18px 0 8px; display:flex; align-items:center; gap:8px; font-size:clamp(.92em,3.2vw,1em);}
+  .lock-title .icon{font-size:1.3em;}
+  .options{display:grid; gap:10px; margin-bottom:8px;}
+  .opt{
+    text-align:left; background:white; border:3px solid #eee; border-radius:14px;
+    padding:12px 14px; cursor:pointer; font-size:clamp(.9em,3.2vw,1em); transition:.15s; font-family:inherit;
+    line-height:1.45; width:100%;
+  }
+  .opt:hover{border-color:var(--blue); transform:translateX(3px);}
+  .opt.selected{border-color:var(--blue); background:#eaf5ff;}
+  .opt.correct{border-color:var(--green); background:#e6f9ef;}
+  .opt.wrong{border-color:#e0575f; background:#fdeceb;}
+  .feedback{
+    min-height:26px; font-weight:bold; margin:6px 0 4px; font-size:.95em;
+  }
+  .feedback.ok{color:#2e9e63;}
+  .feedback.no{color:#c0392b;}
+  .confirm-box{
+    background:#eef6ff; border:2px solid var(--blue); border-radius:14px;
+    padding:12px 14px; margin:4px 0 10px; display:flex; align-items:center;
+    justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  .confirm-box span{font-weight:bold; font-size:clamp(.88em,3vw,.95em);}
+  .confirm-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .btn-confirm-yes{
+    background:var(--green); color:white; border:none; padding:8px 16px;
+    border-radius:20px; font-weight:bold; cursor:pointer; font-size:clamp(.85em,3vw,1em);
+  }
+  .btn-confirm-no{
+    background:white; color:var(--dark); border:2px solid #ccc; padding:8px 16px;
+    border-radius:20px; font-weight:bold; cursor:pointer; font-size:clamp(.85em,3vw,1em);
+  }
+  .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+  button.main{
+    background:var(--pink); color:white; border:none; padding:12px 24px;
+    border-radius:30px; font-size:clamp(.9em,3.2vw,1em); font-weight:bold; cursor:pointer;
+    box-shadow:0 5px 0 #c94f76; transition:.1s; flex:1 1 auto; min-width:180px;
+  }
+  button.main:disabled{background:#ccc; box-shadow:0 5px 0 #999; cursor:not-allowed;}
+  button.main:active:not(:disabled){transform:translateY(4px); box-shadow:none;}
+  button.hint{
+    background:white; border:2px solid var(--yellow); color:#a6740c;
+    padding:10px 18px; border-radius:30px; cursor:pointer; font-weight:bold; font-size:clamp(.85em,3vw,1em);
+  }
+  .hint-box{
+    background:#fff8de; border:2px dashed var(--yellow); border-radius:14px;
+    padding:10px 14px; margin-top:10px; display:none; font-size:clamp(.85em,3vw,.95em); line-height:1.5;
+  }
+  .key-reward{
+    text-align:center; margin-top:16px; padding:14px; background:#f0ffe9;
+    border-radius:16px; border:2px solid var(--green); font-weight:bold; color:#2e9e63; display:none;
+  }
+  .final-card{text-align:center;}
+  .final-emoji{font-size:clamp(2.4em,10vw,3.5em);}
+  .keychain{display:flex; justify-content:center; gap:14px; margin:18px 0; font-size:clamp(1.5em,6vw,2em); flex-wrap:wrap;}
+  .locked{opacity:.35; filter:grayscale(60%); pointer-events:none;}
+  .decor{position:absolute; opacity:.15; font-size:clamp(3.5em,14vw,6em); right:-10px; bottom:-30px; pointer-events:none;}
+  .score-box{
+    text-align:center; background:var(--blue); color:white; border-radius:16px;
+    padding:14px; margin-bottom:16px; font-weight:bold; font-size:clamp(.85em,3vw,1em); line-height:1.6;
+  }
+  @media(max-width:600px){
+    body{padding:12px;}
+    .header{border-radius:18px;}
+    .card{border-radius:18px; margin-bottom:14px;}
+    .btnrow{flex-direction:column;}
+    .btnrow button{width:100%; min-width:0;}
+    .confirm-box{flex-direction:column; align-items:stretch; text-align:center;}
+    .confirm-actions{justify-content:center;}
+  }
+  @media(max-width:380px){
+    .header h1{font-size:1.15em;}
+    .room-badge{padding:5px 12px;}
+    .opt{padding:10px 12px;}
+  }
+  @media(min-width:1000px){
+    .wrap{max-width:860px;}
+  }
+</style>
+</head>
+<body>
+
+<svg id="skyDecor" viewBox="0 0 1200 1600" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+  <!-- awan -->
+  <g fill="#ffffff" opacity="0.75">
+    <g transform="translate(60,90)">
+      <ellipse cx="0" cy="30" rx="55" ry="32"/>
+      <ellipse cx="45" cy="15" rx="45" ry="30"/>
+      <ellipse cx="95" cy="32" rx="55" ry="28"/>
+      <ellipse cx="45" cy="42" rx="70" ry="26"/>
+    </g>
+    <g transform="translate(830,60) scale(0.8)">
+      <ellipse cx="0" cy="30" rx="55" ry="32"/>
+      <ellipse cx="45" cy="15" rx="45" ry="30"/>
+      <ellipse cx="95" cy="32" rx="55" ry="28"/>
+      <ellipse cx="45" cy="42" rx="70" ry="26"/>
+    </g>
+    <g transform="translate(920,340) scale(0.55)">
+      <ellipse cx="0" cy="30" rx="55" ry="32"/>
+      <ellipse cx="45" cy="15" rx="45" ry="30"/>
+      <ellipse cx="95" cy="32" rx="55" ry="28"/>
+      <ellipse cx="45" cy="42" rx="70" ry="26"/>
+    </g>
+    <g transform="translate(-40,470) scale(0.7)">
+      <ellipse cx="0" cy="30" rx="55" ry="32"/>
+      <ellipse cx="45" cy="15" rx="45" ry="30"/>
+      <ellipse cx="95" cy="32" rx="55" ry="28"/>
+      <ellipse cx="45" cy="42" rx="70" ry="26"/>
+    </g>
+    <g transform="translate(870,780) scale(0.65)">
+      <ellipse cx="0" cy="30" rx="55" ry="32"/>
+      <ellipse cx="45" cy="15" rx="45" ry="30"/>
+      <ellipse cx="95" cy="32" rx="55" ry="28"/>
+      <ellipse cx="45" cy="42" rx="70" ry="26"/>
+    </g>
+    <g transform="translate(90,1000) scale(0.6)">
+      <ellipse cx="0" cy="30" rx="55" ry="32"/>
+      <ellipse cx="45" cy="15" rx="45" ry="30"/>
+      <ellipse cx="95" cy="32" rx="55" ry="28"/>
+      <ellipse cx="45" cy="42" rx="70" ry="26"/>
+    </g>
+    <g transform="translate(950,1250) scale(0.5)">
+      <ellipse cx="0" cy="30" rx="55" ry="32"/>
+      <ellipse cx="45" cy="15" rx="45" ry="30"/>
+      <ellipse cx="95" cy="32" rx="55" ry="28"/>
+      <ellipse cx="45" cy="42" rx="70" ry="26"/>
+    </g>
+    <g transform="translate(0,1420) scale(0.6)">
+      <ellipse cx="0" cy="30" rx="55" ry="32"/>
+      <ellipse cx="45" cy="15" rx="45" ry="30"/>
+      <ellipse cx="95" cy="32" rx="55" ry="28"/>
+      <ellipse cx="45" cy="42" rx="70" ry="26"/>
+    </g>
+  </g>
+
+  <!-- balon -->
+  <g opacity="0.55">
+    <g transform="translate(60,260)">
+      <line x1="0" y1="38" x2="-4" y2="90" stroke="#c9a2e0" stroke-width="2"/>
+      <ellipse cx="0" cy="0" rx="26" ry="34" fill="#ffb3c6"/>
+      <ellipse cx="-8" cy="-12" rx="7" ry="10" fill="#ffffff" opacity="0.5"/>
+    </g>
+    <g transform="translate(1080,180)">
+      <line x1="0" y1="38" x2="6" y2="95" stroke="#9fd8c0" stroke-width="2"/>
+      <ellipse cx="0" cy="0" rx="24" ry="31" fill="#ffe08a"/>
+      <ellipse cx="-7" cy="-11" rx="6" ry="9" fill="#ffffff" opacity="0.5"/>
+    </g>
+    <g transform="translate(1000,600)">
+      <line x1="0" y1="34" x2="-5" y2="85" stroke="#f6b8c9" stroke-width="2"/>
+      <ellipse cx="0" cy="0" rx="22" ry="29" fill="#a8d8f0"/>
+      <ellipse cx="-7" cy="-10" rx="6" ry="8" fill="#ffffff" opacity="0.5"/>
+    </g>
+    <g transform="translate(40,720)">
+      <line x1="0" y1="36" x2="4" y2="88" stroke="#f4c88a" stroke-width="2"/>
+      <ellipse cx="0" cy="0" rx="23" ry="30" fill="#c3b6ec"/>
+      <ellipse cx="-7" cy="-11" rx="6" ry="9" fill="#ffffff" opacity="0.5"/>
+    </g>
+    <g transform="translate(1090,930)">
+      <line x1="0" y1="34" x2="-4" y2="82" stroke="#9fd8c0" stroke-width="2"/>
+      <ellipse cx="0" cy="0" rx="21" ry="27" fill="#ffb3c6"/>
+      <ellipse cx="-6" cy="-10" rx="5" ry="8" fill="#ffffff" opacity="0.5"/>
+    </g>
+    <g transform="translate(70,1120)">
+      <line x1="0" y1="36" x2="5" y2="88" stroke="#c9a2e0" stroke-width="2"/>
+      <ellipse cx="0" cy="0" rx="23" ry="30" fill="#a8e0c8"/>
+      <ellipse cx="-7" cy="-11" rx="6" ry="9" fill="#ffffff" opacity="0.5"/>
+    </g>
+    <g transform="translate(1020,1380)">
+      <line x1="0" y1="34" x2="-4" y2="84" stroke="#f6b8c9" stroke-width="2"/>
+      <ellipse cx="0" cy="0" rx="22" ry="28" fill="#ffe08a"/>
+      <ellipse cx="-6" cy="-10" rx="5" ry="8" fill="#ffffff" opacity="0.5"/>
+    </g>
+  </g>
+
+  <!-- matahari kecil -->
+  <g transform="translate(1130,55)" opacity="0.7">
+    <circle r="30" fill="#ffe08a"/>
+    <g stroke="#ffe08a" stroke-width="5" stroke-linecap="round">
+      <line x1="0" y1="-44" x2="0" y2="-54"/>
+      <line x1="0" y1="44" x2="0" y2="54"/>
+      <line x1="-44" y1="0" x2="-54" y2="0"/>
+      <line x1="44" y1="0" x2="54" y2="0"/>
+      <line x1="-31" y1="-31" x2="-38" y2="-38"/>
+      <line x1="31" y1="31" x2="38" y2="38"/>
+      <line x1="-31" y1="31" x2="-38" y2="38"/>
+      <line x1="31" y1="-31" x2="38" y2="-38"/>
+    </g>
+  </g>
+
+  <!-- karikatur anak perempuan -->
+  <g transform="translate(85,430)" opacity="0.9">
+    <ellipse cx="0" cy="118" rx="34" ry="8" fill="#2b2d42" opacity="0.08"/>
+    <path d="M -22 60 Q 0 30 22 60 L 26 108 Q 0 118 -26 108 Z" fill="#ffb3c6"/>
+    <rect x="-9" y="55" width="18" height="14" fill="#f3c9a6"/>
+    <circle cx="0" cy="34" r="24" fill="#f3c9a6"/>
+    <path d="M -24 26 Q -26 -6 0 -8 Q 26 -6 24 26 Q 24 6 0 8 Q -24 6 -24 26 Z" fill="#7a4a2b"/>
+    <circle cx="-24" cy="30" r="8" fill="#7a4a2b"/>
+    <circle cx="24" cy="30" r="8" fill="#7a4a2b"/>
+    <circle cx="-8" cy="36" r="2.4" fill="#2b2d42"/>
+    <circle cx="8" cy="36" r="2.4" fill="#2b2d42"/>
+    <path d="M -7 45 Q 0 50 7 45" stroke="#c0392b" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="-15" cy="42" r="4" fill="#ff9eb0" opacity="0.6"/>
+    <circle cx="15" cy="42" r="4" fill="#ff9eb0" opacity="0.6"/>
+    <line x1="-22" y1="72" x2="-38" y2="96" stroke="#f3c9a6" stroke-width="7" stroke-linecap="round"/>
+    <line x1="22" y1="72" x2="38" y2="90" stroke="#f3c9a6" stroke-width="7" stroke-linecap="round"/>
+    <line x1="-13" y1="112" x2="-16" y2="150" stroke="#f3c9a6" stroke-width="8" stroke-linecap="round"/>
+    <line x1="13" y1="112" x2="16" y2="150" stroke="#f3c9a6" stroke-width="8" stroke-linecap="round"/>
+    <ellipse cx="-17" cy="153" rx="9" ry="5" fill="#9b6bcc"/>
+    <ellipse cx="17" cy="153" rx="9" ry="5" fill="#9b6bcc"/>
+  </g>
+  <g transform="translate(55,590)" opacity="0.85">
+    <path d="M0 0 Q 15 -14 30 0" stroke="#59c88f" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M18 4 Q 33 -10 48 4" stroke="#59c88f" stroke-width="5" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- karikatur anak laki-laki -->
+  <g transform="translate(1110,760)" opacity="0.9">
+    <ellipse cx="0" cy="118" rx="34" ry="8" fill="#2b2d42" opacity="0.08"/>
+    <rect x="-25" y="58" width="50" height="52" rx="14" fill="#a8d8f0"/>
+    <rect x="-9" y="55" width="18" height="12" fill="#e2b58a"/>
+    <circle cx="0" cy="32" r="23" fill="#e2b58a"/>
+    <path d="M -24 24 Q -26 -6 0 -10 Q 26 -6 24 24 Q 22 6 0 4 Q -22 6 -24 24 Z" fill="#3b2a20"/>
+    <circle cx="-8" cy="34" r="2.4" fill="#2b2d42"/>
+    <circle cx="8" cy="34" r="2.4" fill="#2b2d42"/>
+    <path d="M -7 43 Q 0 47 7 43" stroke="#a0402c" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <line x1="-25" y1="72" x2="-42" y2="60" stroke="#a8d8f0" stroke-width="9" stroke-linecap="round"/>
+    <line x1="25" y1="72" x2="42" y2="60" stroke="#a8d8f0" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="-44" cy="58" r="7" fill="#e2b58a"/>
+    <circle cx="44" cy="58" r="7" fill="#e2b58a"/>
+    <rect x="-22" y="104" width="18" height="26" rx="6" fill="#4d9de0"/>
+    <rect x="4" y="104" width="18" height="26" rx="6" fill="#4d9de0"/>
+    <ellipse cx="-13" cy="132" rx="10" ry="5" fill="#ffd166"/>
+    <ellipse cx="13" cy="132" rx="10" ry="5" fill="#ffd166"/>
+  </g>
+
+  <!-- balok alfabet -->
+  <g transform="translate(1150,880) rotate(-8)" opacity="0.8">
+    <rect x="-20" y="-20" width="40" height="40" rx="7" fill="#ffd166"/>
+    <text x="0" y="9" font-family="Trebuchet MS, sans-serif" font-size="26" font-weight="bold" fill="#ffffff" text-anchor="middle">A</text>
+  </g>
+
+  <!-- rumput bawah -->
+  <g stroke="#8fd6a8" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.5">
+    <path d="M 1000 1580 Q 1015 1550 1030 1580"/>
+    <path d="M 1030 1580 Q 1045 1545 1060 1580"/>
+    <path d="M 1060 1580 Q 1075 1555 1090 1580"/>
+  </g>
+</svg>
+
+<div class="wrap">
+
+  <div class="header">
+    <h1>🔑 Escape Room: Dunia Bermain Anak</h1>
+    <p>Bantu anak-anak menemukan kunci dengan menjawab teka-teki observasi bermain!</p>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div id="game"></div>
+
+  <div style="text-align:center; margin-top:24px;">
+    <a href="#" onclick="openDosenLogin(); return false;" style="font-size:.75em; color:#bbb; text-decoration:none;">🔐 Akses Dosen</a>
+  </div>
+
+</div>
+
+<div id="dosenModalOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:999; align-items:center; justify-content:center; padding:clamp(8px,4vw,20px);">
+  <div style="background:white; border-radius:20px; padding:clamp(16px,4vw,24px); max-width:600px; width:100%; max-height:90vh; overflow:auto; font-size:clamp(.9em,3vw,1em);">
+    <div id="dosenModalContent"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- ===== Firebase (Firestore) untuk menyimpan hasil ke cloud ===== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCSwvwXrlr9nI7aFuNgY4JbEwJEqYJeb0k",
+    authDomain: "dunia-bermain-anak.firebaseapp.com",
+    projectId: "dunia-bermain-anak",
+    storageBucket: "dunia-bermain-anak.firebasestorage.app",
+    messagingSenderId: "792384599532",
+    appId: "1:792384599532:web:e185ee5cfc9036288bbcc9",
+    measurementId: "G-XXLXCBQ8R9"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Simpan satu hasil (skor total + jawaban per gembok) ke koleksi "results"
+  window.saveResultToFirestore = async function(record){
+    const docRef = await addDoc(collection(db, "results"), {
+      ...record,
+      createdAt: serverTimestamp()
+    });
+    return docRef.id;
+  };
+
+  // Ambil semua hasil untuk rekap dosen
+  window.getAllResultsFromFirestore = async function(){
+    const snap = await getDocs(collection(db, "results"));
+    const records = [];
+    snap.forEach(doc => records.push({ id: doc.id, ...doc.data() }));
+    return records;
+  };
+</script>
+
+<script>
+const rooms = [
+  {
+    id: 1,
+    title: "Ruang Balok",
+    icon: "🧱",
+    decor: "🧱",
+    text: `Rani (4 tahun) duduk di sudut ruang kelas bersama Dimas (4 tahun). Keduanya memiliki set balok kayu masing-masing. Rani sesekali melirik menara yang dibangun Dimas dan berkata, "Punyaku lebih tinggi lho," lalu kembali fokus menyusun baloknya sendiri. Mereka berdua duduk berdekatan, sesekali bertukar potongan balok berwarna merah, tetapi masing-masing membangun struktur yang berbeda dan tidak ada rencana bersama.`,
+    locks: [
+      {
+        q: "Gembok 1 — Jenis bermain berdasarkan fungsi (Hurlock):",
+        options: [
+          "Bermain aktif — anak mengikuti instruksi guru dalam menyusun balok bertahap",
+          "Bermain aktif — anak terlibat langsung menyusun dan mengatur baloknya sendiri",
+          "Bermain pasif — anak hanya menikmati hasil susunan balok milik temannya"
+        ],
+        correct: 1,
+        hint: "Perhatikan siapa yang benar-benar memegang dan menyusun balok, serta apakah ada arahan dari orang dewasa dalam narasi."
+      },
+      {
+        q: "Gembok 2 — Tahap bermain menurut Parten:",
+        options: [
+          "Parallel play — anak duduk berdampingan namun membangun struktur masing-masing",
+          "Associative play — anak bermain bahan yang sama demi tujuan bersama",
+          "Onlooker play — anak hanya mengamati temannya menyusun balok"
+        ],
+        correct: 0,
+        hint: "Cek apakah ada rencana/tujuan yang disepakati bersama, atau apakah keduanya justru membangun struktur yang berbeda."
+      },
+      {
+        q: "Gembok 3 — Jenis bermain kognitif (Piaget–Smilansky):",
+        options: [
+          "Constructive play — bahan disusun menjadi bentuk tertentu sesuai rancangan anak",
+          "Functional play — gerakan tubuh diulang tanpa membentuk sesuatu yang jelas",
+          "Games with rules — anak menaati aturan giliran yang disepakati bersama"
+        ],
+        correct: 0,
+        hint: "Perhatikan hasil akhirnya: apakah balok berubah menjadi sebuah bentuk (misalnya menara), atau hanya gerakan berulang tanpa hasil bentuk."
+      },
+      {
+        q: "Gembok 4 — Fungsi perkembangan yang paling menonjol dalam skenario ini:",
+        options: [
+          "Bahasa reseptif — anak lebih banyak mendengarkan ucapan temannya",
+          "Motorik halus dan kesadaran sosial awal lewat perbandingan hasil karya",
+          "Pemahaman moral kompleks tentang benar dan salah"
+        ],
+        correct: 1,
+        hint: "Perhatikan dua hal: tindakan tangan menyusun balok, dan ucapan Rani yang membandingkan tinggi menara — bukan sekadar mendengarkan atau menilai moral."
+      }
+    ],
+    key: "🟦"
+  },
+  {
+    id: 2,
+    title: "Dokter-dokteran",
+    icon: "🩺",
+    decor: "🩺",
+    text: `Sekelompok anak usia 5 tahun (Aisyah, Bima, dan Citra) bermain di sudut dramatik. Aisyah berperan sebagai dokter, Bima sebagai pasien yang berpura-pura sakit perut, dan Citra sebagai perawat yang menyiapkan "obat" dari plastisin. Mereka menyepakati alur cerita: pasien datang, diperiksa, diberi obat, lalu pulang. Ketika Bima ingin mengubah jalan cerita, Aisyah berkata, "Jangan gitu, kan tadi kamu sakit perut, harus nunggu dulu."`,
+    locks: [
+      {
+        q: "Gembok 1 — Jenis bermain berdasarkan fungsi (Hurlock):",
+        options: [
+          "Bermain pasif — anak-anak mengikuti skrip cerita yang sudah disusun guru",
+          "Bermain aktif — ketiga anak berperan langsung dan mengatur alur ceritanya sendiri",
+          "Bermain aktif — hanya satu anak yang bermain, dua lainnya menonton di sudut"
+        ],
+        correct: 1,
+        hint: "Cek siapa yang benar-benar berperan dan berdialog, serta apakah alur ceritanya muncul dari anak-anak sendiri atau dari arahan guru."
+      },
+      {
+        q: "Gembok 2 — Tahap bermain menurut Parten:",
+        options: [
+          "Cooperative play — ada pembagian peran dan alur cerita yang disepakati bersama",
+          "Associative play — anak bermain barang yang sama tanpa pembagian peran jelas",
+          "Parallel play — anak duduk berdekatan namun memainkan cerita masing-masing"
+        ],
+        correct: 0,
+        hint: "Perhatikan apakah ada pembagian peran (dokter, pasien, perawat) dan apakah Aisyah menegakkan aturan cerita yang disepakati bersama."
+      },
+      {
+        q: "Gembok 3 — Jenis bermain menurut Piaget–Smilansky:",
+        options: [
+          "Constructive play — anak menyusun properti dokter-dokteran menjadi bentuk tertentu",
+          "Sociodramatic play — anak memerankan tokoh dan berdialog sesuai peran bersama",
+          "Functional play — anak mengulang gerakan memeriksa pasien tanpa alur cerita"
+        ],
+        correct: 1,
+        hint: "Fokus pada dialog, peran yang dimainkan, dan negosiasi alur cerita antar anak — bukan sekadar menyusun benda atau gerakan berulang."
+      },
+      {
+        q: "Gembok 4 — Fungsi perkembangan yang paling menonjol dalam skenario ini:",
+        options: [
+          "Motorik kasar — anak-anak banyak bergerak berpindah peran dan posisi",
+          "Bahasa ekspresif, pemahaman peran sosial, dan regulasi diri lewat konsistensi cerita",
+          "Kemampuan berhitung — anak-anak menghitung jumlah obat yang diberikan"
+        ],
+        correct: 1,
+        hint: "Perhatikan dialog antar anak, pembagian peran, dan cara Aisyah mempertahankan alur cerita agar tetap masuk akal bagi Bima."
+      }
+    ],
+    key: "🟥"
+  },
+  {
+    id: 3,
+    title: "Congklak di Halaman",
+    icon: "🎲",
+    decor: "🎲",
+    text: `Sekelompok anak usia 6 tahun bermain congklak saat istirahat. Mereka bergiliran mengambil biji, menghitung langkah dengan teliti, dan salah satu anak mengingatkan, "Bukan gitu caranya, biji terakhir harus masuk lumbung dulu baru boleh ambil lagi." Anak yang lain menerima koreksi tersebut dan melanjutkan permainan sesuai aturan yang disepakati bersama.`,
+    locks: [
+      {
+        q: "Gembok 1 — Jenis bermain berdasarkan fungsi (Hurlock):",
+        options: [
+          "Bermain pasif — anak-anak menonton giliran temannya tanpa ikut mengambil biji",
+          "Bermain aktif — setiap anak ikut mengambil biji dan menjalankan giliran sendiri",
+          "Bermain aktif — anak-anak hanya mengikuti arahan guru di setiap langkahnya"
+        ],
+        correct: 1,
+        hint: "Cek apakah setiap anak benar-benar ikut bermain dan menjalankan aturan sendiri, atau hanya menonton atau mengikuti arahan orang dewasa."
+      },
+      {
+        q: "Gembok 2 — Jenis bermain menurut Piaget–Smilansky:",
+        options: [
+          "Constructive play — anak menyusun biji congklak menjadi pola tertentu",
+          "Games with rules — anak menjalankan aturan baku dan giliran yang disepakati bersama",
+          "Sociodramatic play — anak memerankan tokoh penjual dan pembeli biji congklak"
+        ],
+        correct: 1,
+        hint: "Perhatikan adanya aturan tetap (biji terakhir masuk lumbung), giliran yang diatur, dan koreksi aturan yang diterima bersama."
+      },
+      {
+        q: "Gembok 3 — Dibanding Skenario 1 (Rani & Dimas), dari sisi tahap sosial Parten, permainan congklak ini menunjukkan:",
+        options: [
+          "Tahap sosial yang setara, karena keduanya sama-sama melibatkan lebih dari satu anak",
+          "Tahap sosial yang lebih matang, karena melibatkan aturan formal yang disepakati bersama",
+          "Tahap sosial yang lebih rendah, karena anak hanya fokus pada bijinya masing-masing"
+        ],
+        correct: 1,
+        hint: "Bandingkan apakah ada tujuan/aturan bersama yang disepakati dan ditegakkan, dibanding skenario 1 yang belum memiliki hal tersebut."
+      },
+      {
+        q: "Gembok 4 — Fungsi perkembangan yang paling menonjol dalam skenario ini:",
+        options: [
+          "Motorik kasar — anak-anak banyak bergerak mengambil biji dari lumbung",
+          "Bahasa ekspresif — anak-anak banyak berdialog selama permainan berlangsung",
+          "Kontrol diri menunggu giliran serta ketelitian berhitung dan pemahaman aturan"
+        ],
+        correct: 2,
+        hint: "Perhatikan cara anak menunggu giliran, menghitung biji dengan teliti, dan menerima koreksi aturan dari temannya."
+      }
+    ],
+    key: "🟩"
+  }
+];
+
+let current = 0;
+let collectedKeys = [];
+let totalCorrect = 0;
+let totalLocks = rooms.reduce((a,r)=>a+r.locks.length,0);
+let perLockMax = 100 / totalLocks;
+let lockState = {}; // roomIdx-lockIdx -> answered correctly
+let lockScore = {}; // roomIdx-lockIdx -> score earned for that lock
+let wrongCount = {}; // roomIdx-lockIdx -> number of wrong attempts before correct
+let totalScore = 0;
+let student = { name: "", nim: "" };
+
+function renderStudentForm(){
+  const game = document.getElementById('game');
+  document.getElementById('progress').innerHTML = '';
+  game.innerHTML = `
+    <div class="card final-card">
+      <div class="final-emoji">🎒</div>
+      <h2 style="color:var(--purple); margin-top:0;">Sebelum Mulai, Isi Data Dulu ya!</h2>
+      <p style="text-align:left;">Isi nama dan NIM kamu supaya hasil permainan tercatat dengan benar.</p>
+      <p style="text-align:left; font-size:.85em; color:#888;">ℹ️ Skor akhir kamu akan otomatis tersimpan dan direkap oleh dosen.</p>
+      <div style="text-align:left; margin-top:16px;">
+        <label style="font-weight:bold; display:block; margin-bottom:6px;">Nama Lengkap</label>
+        <input id="inputName" type="text" placeholder="Contoh: Siti Aisyah"
+          style="width:100%; padding:12px 14px; border-radius:12px; border:2px solid var(--blue); font-size:1em; font-family:inherit; margin-bottom:16px;">
+        <label style="font-weight:bold; display:block; margin-bottom:6px;">NIM</label>
+        <input id="inputNim" type="text" placeholder="Contoh: 2210201234"
+          style="width:100%; padding:12px 14px; border-radius:12px; border:2px solid var(--blue); font-size:1em; font-family:inherit;">
+      </div>
+      <div class="feedback no" id="formError" style="text-align:left;"></div>
+      <div class="btnrow" style="justify-content:center;">
+        <button class="main" onclick="startGame()">Mulai Bermain ✨</button>
+      </div>
+    </div>
+  `;
+}
+
+function startGame(){
+  const name = document.getElementById('inputName').value.trim();
+  const nim = document.getElementById('inputNim').value.trim();
+  const err = document.getElementById('formError');
+  if(!name || !nim){
+    err.textContent = "⚠️ Nama dan NIM wajib diisi sebelum mulai.";
+    return;
+  }
+  student.name = name;
+  student.nim = nim;
+  renderRoom(current);
+}
+
+function renderProgress(){
+  const p = document.getElementById('progress');
+  p.innerHTML = rooms.map((r,i)=>{
+    let cls = 'dot';
+    if(i < current) cls += ' done';
+    else if(i === current) cls += ' active';
+    return `<div class="${cls}" title="${r.title}"></div>`;
+  }).join('') + `<div class="dot ${current>=rooms.length?'done':''}" title="Selesai"></div>`;
+}
+
+function renderRoom(idx){
+  const game = document.getElementById('game');
+  if(idx >= rooms.length){
+    renderFinal();
+    return;
+  }
+  const room = rooms[idx];
+  let locksHtml = room.locks.map((lock, li)=>{
+    return `
+    <div class="lock-title"><span class="icon">🔒</span> ${lock.q}</div>
+    <div class="options" id="opts-${idx}-${li}">
+      ${lock.options.map((opt,oi)=>`<button class="opt" data-room="${idx}" data-lock="${li}" data-opt="${oi}">${opt}</button>`).join('')}
+    </div>
+    <div class="confirm-box" id="confirm-${idx}-${li}" style="display:none;"></div>
+    <div class="feedback" id="fb-${idx}-${li}"></div>
+    <button class="hint" onclick="toggleHint(${idx},${li})">💡 Minta Petunjuk</button>
+    <div class="hint-box" id="hint-${idx}-${li}">${lock.hint}</div>
+    <hr style="border:none;border-top:2px dotted #ddd;margin:18px 0;">
+    `;
+  }).join('');
+
+  game.innerHTML = `
+    <div class="card">
+      <div class="decor">${room.decor}</div>
+      <div class="room-badge">Ruangan ${idx+1} dari ${rooms.length}</div>
+      <div style="font-size:.85em; color:#666; margin-bottom:6px;">👤 ${student.name} — NIM ${student.nim}</div>
+      <div class="scenario-title">${room.icon} Skenario: "${room.title}"</div>
+      <div class="scenario-text">${room.text}</div>
+      ${locksHtml}
+      <div class="key-reward" id="reward-${idx}">
+        🎉 Semua gembok terbuka! Kamu mendapat kunci ${room.key}
+      </div>
+      <div class="btnrow">
+        <button class="main" id="nextBtn" disabled onclick="goNext()">
+          ${idx === rooms.length-1 ? 'Buka Pintu Terakhir 🎉' : 'Lanjut ke Ruangan Berikutnya ➡️'}
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll(`#game .opt`).forEach(btn=>{
+    btn.addEventListener('click', onOptionClick);
+  });
+  renderProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleHint(r,l){
+  const box = document.getElementById(`hint-${r}-${l}`);
+  box.style.display = box.style.display === 'block' ? 'none' : 'block';
+}
+
+let pendingSelection = {}; // roomIdx-lockIdx -> opt index waiting for confirmation
+
+function onOptionClick(e){
+  const btn = e.currentTarget;
+  if(btn.disabled) return;
+  const r = +btn.dataset.room, l = +btn.dataset.lock, o = +btn.dataset.opt;
+  const key = `${r}-${l}`;
+  if(lockState[key]) return; // already solved
+
+  const tries = wrongCount[key] || 0;
+  const optsWrap = document.getElementById(`opts-${r}-${l}`);
+  const allBtns = optsWrap.querySelectorAll('.opt');
+
+  // Percobaan ke-3 (hanya 1 opsi tersisa) -> langsung diproses, tanpa konfirmasi
+  if(tries >= 2){
+    processAnswer(r, l, o, btn);
+    return;
+  }
+
+  // Tampilkan konfirmasi sebelum jawaban diproses
+  allBtns.forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  pendingSelection[key] = o;
+
+  const confirmBox = document.getElementById(`confirm-${r}-${l}`);
+  confirmBox.style.display = 'flex';
+  confirmBox.innerHTML = `
+    <span>Yakin dengan jawaban ini?</span>
+    <div class="confirm-actions">
+      <button class="btn-confirm-yes" onclick="confirmAnswer(${r},${l})">✅ Ya, Pilih Ini</button>
+      <button class="btn-confirm-no" onclick="cancelAnswer(${r},${l})">↩️ Ganti Pilihan</button>
+    </div>
+  `;
+}
+
+function cancelAnswer(r,l){
+  const key = `${r}-${l}`;
+  delete pendingSelection[key];
+  const optsWrap = document.getElementById(`opts-${r}-${l}`);
+  optsWrap.querySelectorAll('.opt').forEach(b=>b.classList.remove('selected'));
+  const confirmBox = document.getElementById(`confirm-${r}-${l}`);
+  confirmBox.style.display = 'none';
+  confirmBox.innerHTML = '';
+}
+
+function confirmAnswer(r,l){
+  const key = `${r}-${l}`;
+  const o = pendingSelection[key];
+  if(o === undefined) return;
+  const optsWrap = document.getElementById(`opts-${r}-${l}`);
+  const btn = optsWrap.querySelector(`.opt[data-opt="${o}"]`);
+  const confirmBox = document.getElementById(`confirm-${r}-${l}`);
+  confirmBox.style.display = 'none';
+  confirmBox.innerHTML = '';
+  delete pendingSelection[key];
+  processAnswer(r, l, o, btn);
+}
+
+function processAnswer(r, l, o, btn){
+  const key = `${r}-${l}`;
+  const lock = rooms[r].locks[l];
+  const optsWrap = document.getElementById(`opts-${r}-${l}`);
+  const fb = document.getElementById(`fb-${r}-${l}`);
+  const allBtns = optsWrap.querySelectorAll('.opt');
+
+  if(o === lock.correct){
+    btn.classList.remove('selected');
+    btn.classList.add('correct');
+    allBtns.forEach(b=>b.disabled=true);
+
+    const tries = wrongCount[key] || 0; // 0 = langsung benar (percobaan ke-1)
+    let earned = 0;
+    let msg = "";
+    if(tries === 0){
+      earned = perLockMax;
+      msg = `✅ Benar langsung di percobaan pertama! Skor: ${earned.toFixed(2)} poin (maksimal).`;
+    } else if(tries === 1){
+      earned = perLockMax / 2;
+      msg = `✅ Benar di percobaan kedua. Skor: ${earned.toFixed(2)} poin (setengah dari maksimal).`;
+    } else {
+      earned = 0;
+      msg = `✅ Terbuka di percobaan terakhir (semua opsi sudah dicoba). Skor: 0 poin.`;
+    }
+    lockScore[key] = earned;
+    totalScore += earned;
+
+    fb.textContent = msg;
+    fb.className = "feedback ok";
+    lockState[key] = true;
+    totalCorrect++;
+    checkRoomComplete(r);
+  } else {
+    btn.classList.remove('selected');
+    btn.classList.add('wrong');
+    btn.disabled = true; // opsi salah tidak bisa dipilih lagi
+    wrongCount[key] = (wrongCount[key] || 0) + 1;
+    if(wrongCount[key] >= 2){
+      fb.textContent = "❌ Belum tepat. Ini percobaan terakhirmu — opsi yang tersisa pasti jawabannya, tapi skor untuk soal ini akan 0.";
+    } else {
+      fb.textContent = "❌ Belum tepat, coba periksa lagi bukti perilaku di skenario. Percobaan berikutnya hanya bernilai setengah skor.";
+    }
+    fb.className = "feedback no";
+  }
+}
+
+function checkRoomComplete(r){
+  const room = rooms[r];
+  const allSolved = room.locks.every((_,li)=>lockState[`${r}-${li}`]);
+  if(allSolved){
+    document.getElementById(`reward-${r}`).style.display = 'block';
+    document.getElementById('nextBtn').disabled = false;
+    collectedKeys.push(room.key);
+  }
+}
+
+function goNext(){
+  current++;
+  renderRoom(current);
+}
+
+async function renderFinal(){
+  const game = document.getElementById('game');
+  const scoreRounded = Math.round(totalScore * 100) / 100;
+  game.innerHTML = `
+    <div class="card final-card">
+      <div class="final-emoji">🏆🎈</div>
+      <h2 style="color:var(--purple);">Selamat, ${student.name}!</h2>
+      <p style="margin-top:-8px; color:#666;">NIM: ${student.nim}</p>
+      <div class="keychain">${collectedKeys.join(' ')}</div>
+      <div class="score-box" style="font-size:1.3em;">
+        🌟 Total Skor Kamu: ${scoreRounded} / 100
+      </div>
+      <p>Kamu menjawab benar <b>${totalCorrect} dari ${totalLocks}</b> gembok (skor dipengaruhi jumlah percobaan tiap gembok).</p>
+      <div class="score-box">
+        Ringkasan: Skenario 1 (Ruang Balok) → Parallel & Constructive Play<br>
+        Skenario 2 (Dokter-dokteran) → Cooperative & Sociodramatic Play<br>
+        Skenario 3 (Congklak) → Games with Rules — puncak kematangan sosial Parten
+      </div>
+      <div id="saveStatus" style="margin:10px 0; font-size:.9em; color:#666;">Menyimpan hasil...</div>
+      <div class="btnrow" style="justify-content:center;">
+        <button class="main" onclick="restart()">🔁 Main Lagi</button>
+      </div>
+    </div>
+  `;
+  renderProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  await saveResult(scoreRounded);
+}
+
+async function saveResult(scoreRounded){
+  const statusEl = document.getElementById('saveStatus');
+  try{
+    const answers = [];
+    rooms.forEach((room, r)=>{
+      room.locks.forEach((lock, l)=>{
+        const key = `${r}-${l}`;
+        answers.push({
+          room: room.title,
+          question: lock.q,
+          correctOptionText: lock.options[lock.correct],
+          isSolved: !!lockState[key],
+          wrongAttempts: wrongCount[key] || 0,
+          scoreEarned: lockScore[key] || 0
+        });
+      });
+    });
+
+    const record = {
+      name: student.name,
+      nim: student.nim,
+      score: scoreRounded,
+      correct: totalCorrect,
+      totalLocks: totalLocks,
+      answers: answers,
+      timestamp: new Date().toISOString()
+    };
+
+    if(!window.saveResultToFirestore) throw new Error("Firestore belum siap");
+    await window.saveResultToFirestore(record);
+    if(statusEl){
+      statusEl.textContent = "✅ Hasil tersimpan ke database.";
+    }
+  } catch(e){
+    if(statusEl) statusEl.textContent = "⚠️ Gagal menyimpan hasil (" + (e && e.message ? e.message : "koneksi bermasalah") + "). Catat manual skor kamu jika perlu.";
+  }
+}
+
+function restart(){
+  current = 0; collectedKeys = []; totalCorrect = 0; lockState = {};
+  lockScore = {}; wrongCount = {}; totalScore = 0; pendingSelection = {};
+  renderStudentForm();
+}
+
+renderStudentForm();
+
+// ===== AKSES DOSEN (terpisah dari tampilan mahasiswa) =====
+// Ganti kata sandi di bawah ini sesuai keinginan Bapak/Ibu dosen.
+const DOSEN_PASSWORD = "dosen123";
+
+function openDosenLogin(){
+  const overlay = document.getElementById('dosenModalOverlay');
+  const content = document.getElementById('dosenModalContent');
+  overlay.style.display = 'flex';
+  content.innerHTML = `
+    <h3 style="color:var(--purple); margin-top:0;">🔐 Akses Dosen</h3>
+    <p style="font-size:.9em; color:#666;">Masukkan kata sandi dosen untuk melihat rekap nilai seluruh mahasiswa.</p>
+    <input id="dosenPassInput" type="password" placeholder="Kata sandi"
+      style="width:100%; padding:10px 12px; border-radius:10px; border:2px solid var(--blue); font-family:inherit; margin-bottom:10px;">
+    <div id="dosenLoginError" style="color:#c0392b; font-size:.9em; min-height:20px;"></div>
+    <div class="btnrow">
+      <button class="main" onclick="checkDosenPassword()">Masuk</button>
+      <button class="btn-confirm-no" onclick="closeDosenModal()">Batal</button>
+    </div>
+  `;
+  document.getElementById('dosenPassInput').focus();
+}
+
+function closeDosenModal(){
+  document.getElementById('dosenModalOverlay').style.display = 'none';
+}
+
+async function checkDosenPassword(){
+  const input = document.getElementById('dosenPassInput').value;
+  const err = document.getElementById('dosenLoginError');
+  if(input !== DOSEN_PASSWORD){
+    err.textContent = "Kata sandi salah.";
+    return;
+  }
+  await renderDosenRecap();
+}
+
+async function renderDosenRecap(){
+  const content = document.getElementById('dosenModalContent');
+  content.innerHTML = `<h3 style="color:var(--purple); margin-top:0;">📋 Rekap Nilai Seluruh Mahasiswa</h3><p>Memuat data...</p>`;
+  try{
+    if(!window.getAllResultsFromFirestore) throw new Error("Firestore belum siap");
+    const records = await window.getAllResultsFromFirestore();
+    if(!records || records.length === 0){
+      content.innerHTML = `
+        <h3 style="color:var(--purple); margin-top:0;">📋 Rekap Nilai Seluruh Mahasiswa</h3>
+        <p>Belum ada hasil yang tersimpan.</p>
+        <div class="btnrow"><button class="btn-confirm-no" onclick="closeDosenModal()">Tutup</button></div>
+      `;
+      return;
+    }
+    records.sort((a,b)=> b.score - a.score);
+    const rows = records.map((rec, idx)=>`
+      <tr>
+        <td style="padding:6px 8px; border-bottom:1px solid #eee;">${rec.name}</td>
+        <td style="padding:6px 8px; border-bottom:1px solid #eee;">${rec.nim}</td>
+        <td style="padding:6px 8px; border-bottom:1px solid #eee; text-align:center;">${rec.score}</td>
+        <td style="padding:6px 8px; border-bottom:1px solid #eee; text-align:center;">${rec.correct}/${rec.totalLocks}</td>
+        <td style="padding:6px 8px; border-bottom:1px solid #eee; font-size:.8em; color:#888;">${rec.timestamp ? new Date(rec.timestamp).toLocaleString('id-ID') : '-'}</td>
+        <td style="padding:6px 8px; border-bottom:1px solid #eee; text-align:center;">
+          ${rec.answers ? `<button class="btn-confirm-no" style="padding:4px 10px; font-size:.85em;" onclick="showAnswerDetail(${idx})">🔍 Lihat</button>` : '-'}
+        </td>
+      </tr>
+    `).join('');
+    content.innerHTML = `
+      <h3 style="color:var(--purple); margin-top:0;">📋 Rekap Nilai Seluruh Mahasiswa</h3>
+      <div style="overflow:auto;">
+      <table style="width:100%; border-collapse:collapse; background:white;">
+        <thead>
+          <tr style="background:var(--blue); color:white;">
+            <th style="padding:8px; text-align:left;">Nama</th>
+            <th style="padding:8px; text-align:left;">NIM</th>
+            <th style="padding:8px;">Skor</th>
+            <th style="padding:8px;">Benar</th>
+            <th style="padding:8px; text-align:left;">Waktu</th>
+            <th style="padding:8px;">Detail</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </div>
+      <div class="btnrow" style="margin-top:14px;">
+        <button class="main" onclick="downloadRecapExcel()">📊 Unduh Excel (.xlsx)</button>
+        <button class="main" onclick="downloadRecapCSV()">⬇️ Unduh CSV</button>
+        <button class="btn-confirm-no" onclick="closeDosenModal()">Tutup</button>
+      </div>
+    `;
+    window._recapRecords = records;
+  } catch(e){
+    content.innerHTML = `
+      <h3 style="color:var(--purple); margin-top:0;">📋 Rekap Nilai Seluruh Mahasiswa</h3>
+      <p>⚠️ Rekap tidak dapat dimuat saat ini.</p>
+      <div class="btnrow"><button class="btn-confirm-no" onclick="closeDosenModal()">Tutup</button></div>
+    `;
+  }
+}
+
+function showAnswerDetail(idx){
+  const records = window._recapRecords || [];
+  const rec = records[idx];
+  if(!rec || !rec.answers) return;
+  const overlay = document.getElementById('dosenModalOverlay');
+  const content = document.getElementById('dosenModalContent');
+  const rows = rec.answers.map(a=>`
+    <tr>
+      <td style="padding:6px 8px; border-bottom:1px solid #eee;">${a.room}</td>
+      <td style="padding:6px 8px; border-bottom:1px solid #eee;">${a.question}</td>
+      <td style="padding:6px 8px; border-bottom:1px solid #eee;">${a.correctOptionText}</td>
+      <td style="padding:6px 8px; border-bottom:1px solid #eee; text-align:center;">${a.isSolved ? '✅' : '❌ (belum selesai)'}</td>
+      <td style="padding:6px 8px; border-bottom:1px solid #eee; text-align:center;">${a.wrongAttempts}</td>
+      <td style="padding:6px 8px; border-bottom:1px solid #eee; text-align:center;">${a.scoreEarned.toFixed(2)}</td>
+    </tr>
+  `).join('');
+  content.innerHTML = `
+    <h3 style="color:var(--purple); margin-top:0;">🔍 Detail Jawaban — ${rec.name} (${rec.nim})</h3>
+    <div style="overflow:auto; max-height:50vh;">
+    <table style="width:100%; border-collapse:collapse; background:white; font-size:.85em;">
+      <thead>
+        <tr style="background:var(--blue); color:white;">
+          <th style="padding:8px; text-align:left;">Ruang</th>
+          <th style="padding:8px; text-align:left;">Soal</th>
+          <th style="padding:8px; text-align:left;">Jawaban Benar</th>
+          <th style="padding:8px;">Status</th>
+          <th style="padding:8px;">Salah</th>
+          <th style="padding:8px;">Skor</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>
+    <div class="btnrow" style="margin-top:14px;">
+      <button class="btn-confirm-no" onclick="renderDosenRecap()">↩️ Kembali ke Rekap</button>
+      <button class="btn-confirm-no" onclick="closeDosenModal()">Tutup</button>
+    </div>
+  `;
+}
+
+function downloadRecapExcel(){
+  const records = window._recapRecords || [];
+  if(typeof XLSX === 'undefined'){
+    alert("Library Excel belum siap dimuat. Coba beberapa detik lagi lalu klik ulang.");
+    return;
+  }
+  const dataForSheet = records.map(r => ({
+    "Nama": r.name,
+    "NIM": r.nim,
+    "Skor": r.score,
+    "Jumlah Benar": r.correct,
+    "Total Soal": r.totalLocks,
+    "Waktu Pengerjaan": r.timestamp ? new Date(r.timestamp).toLocaleString('id-ID') : '-'
+  }));
+  const ws = XLSX.utils.json_to_sheet(dataForSheet);
+  ws['!cols'] = [ {wch:24}, {wch:16}, {wch:10}, {wch:14}, {wch:12}, {wch:22} ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Rekap Nilai");
+
+  // Sheet detail jawaban per soal untuk semua mahasiswa
+  const detailRows = [];
+  records.forEach(r=>{
+    (r.answers || []).forEach(a=>{
+      detailRows.push({
+        "Nama": r.name,
+        "NIM": r.nim,
+        "Ruang": a.room,
+        "Soal": a.question,
+        "Jawaban Benar": a.correctOptionText,
+        "Status": a.isSolved ? 'Selesai' : 'Belum Selesai',
+        "Percobaan Salah": a.wrongAttempts,
+        "Skor Soal": a.scoreEarned
+      });
+    });
+  });
+  if(detailRows.length){
+    const wsDetail = XLSX.utils.json_to_sheet(detailRows);
+    wsDetail['!cols'] = [ {wch:24}, {wch:16}, {wch:20}, {wch:40}, {wch:40}, {wch:14}, {wch:14}, {wch:10} ];
+    XLSX.utils.book_append_sheet(wb, wsDetail, "Detail Jawaban");
+  }
+
+  XLSX.writeFile(wb, "rekap_nilai_mahasiswa.xlsx");
+}
+
+function downloadRecapCSV(){
+  const records = window._recapRecords || [];
+  let csv = "Nama,NIM,Skor,Benar,Total Soal,Waktu\n";
+  records.forEach(r=>{
+    csv += `"${r.name}","${r.nim}",${r.score},${r.correct},${r.totalLocks},"${r.timestamp ? new Date(r.timestamp).toLocaleString('id-ID') : '-'}"\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'rekap_nilai_mahasiswa.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
