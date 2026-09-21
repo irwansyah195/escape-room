@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================
+    // HELPER FUNCTIONS (VALIDASI DATA SERVER-SIDE)
+    // =========================================================
+
+    // Validasi skema hasil pengerjaan mahasiswa
+    function isValidResult(data) {
+      return data.keys().hasAll(['nama', 'nim', 'score', 'createdAt'])
+        && data.score is number
+        && data.score >= 0 && data.score <= 100
+        && data.nama is string
+        && data.nama.size() >= 2 && data.nama.size() <= 60
+        && data.nim is string
+        && data.nim.size() >= 4 && data.nim.size() <= 30;
+    }
+
+    // Validasi hash PIN dosen (wajib format SHA-256 heksadesimal 64 karakter)
+    function isValidPinUpdate(data) {
+      return data.keys().hasAll(['pinHash', 'updatedAt'])
+        && data.pinHash is string
+        && data.pinHash.size() == 64;
+    }
+
+    // Validasi struktur penyimpanan bank soal ruangan
+    function isValidRoomsData(data) {
+      return data.keys().hasAll(['list', 'updatedAt'])
+        && data.list is list
+        && data.list.size() > 0
+        && data.list.size() <= 25; // Maksimal 25 ruangan untuk mencegah pembengkakan database
+    }
+
+    // =========================================================
+    // RULES FOR EACH COLLECTION
+    // =========================================================
+
+    // 1. Koleksi Ruangan & Bank Soal (content/rooms_data)
+    // Mahasiswa dan dosen dapat membaca soal yang aktif.
+    // Penulisan divalidasi ketat agar tidak ada payload berbahaya atau melebihi batas ruangan.
+    match /content/rooms_data {
+      allow read: if true;
+      allow write: if isValidRoomsData(request.resource.data);
+    }
+
+    // 2. Koleksi Rekap Nilai Mahasiswa (results/{resultId})
+    // Mahasiswa HANYA dapat menambah dokumen baru (create) dengan skema valid.
+    // IMMUTABILITY: Dokumen nilai TIDAK DAPAT diubah/diedit (update: false) oleh siapapun dari sisi klien.
+    // Penghapusan diizinkan untuk membersihkan data uji coba / simulasi.
+    match /results/{resultId} {
+      allow read: if true;
+      allow create: if isValidResult(request.resource.data);
+      allow update: if false;
+      allow delete: if true;
+    }
+
+    // 3. Pengaturan Keamanan & Hash PIN (settings/security)
+    // Verifikasi hash diizinkan (read), penulisan hanya boleh string SHA-256 64 karakter.
+    match /settings/security {
+      allow read: if true;
+      allow write: if isValidPinUpdate(request.resource.data);
+    }
+
+    // Kunci seluruh dokumen lain di luar koleksi yang ditentukan
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

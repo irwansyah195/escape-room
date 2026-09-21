@@ -8,12 +8,25 @@ export default function StudentForm({ onStart }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name.trim() || !nim.trim()) {
+    const cleanName = name.trim();
+    const cleanNim = nim.trim();
+
+    if (!cleanName || !cleanNim) {
       setError('⚠️ Nama Lengkap dan NIM wajib diisi sebelum mulai.');
       return;
     }
+    if (cleanName.length < 2 || cleanName.length > 60) {
+      setError('⚠️ Nama Mahasiswa harus antara 2 hingga 60 karakter.');
+      return;
+    }
+    if (cleanNim.length < 4 || cleanNim.length > 30) {
+      setError('⚠️ NIM harus antara 4 hingga 30 karakter.');
+      return;
+    }
+
     setError('');
-    onStart({ name: name.trim(), nim: nim.trim() });
+    const uniqueSessionId = `sess_${cleanNim.replace(/[^a-zA-Z0-9]/g, '')}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    onStart({ name: cleanName, nim: cleanNim, sessionId: uniqueSessionId });
   };
 
   return (

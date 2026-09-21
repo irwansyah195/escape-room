@@ -24,11 +24,16 @@ Aplikasi web edugame interaktif berbasis **React + Vite** yang dirancang untuk p
 ### 🔐 2. Portal Manajemen Dosen (Halaman Penuh Khusus `/dosen`)
 Dosen memiliki halaman khusus terpisah di URL **`/dosen`** (bukan modal pop-up) dengan fitur:
 
-#### A. Keamanan Akses (*Anti-Inspect Element*)
-- Password dosen diverifikasi menggunakan algoritma kriptografi **SHA-256 dengan Salt Rahasia** (`Web Crypto API`).
-- Teks sandi asli (*plaintext*) **tidak pernah disimpan di kode JavaScript, DOM, localStorage, ataupun Firestore**.
-- Mahasiswa yang membuka *Inspect Element (DevTools)* hanya akan melihat hash satu arah 64-karakter yang tidak dapat didekripsi.
-- Sesi login dosen disimpan di `sessionStorage` (otomatis terhapus saat tab browser ditutup).
+#### A. Keamanan Akses (*Anti-Inspect Element & Anti Brute-Force*)
+- **Kriptografi Salted SHA-256**: Password dosen diverifikasi menggunakan algoritma **SHA-256 dengan Salt Rahasia** (`Web Crypto API`). Teks sandi asli (*plaintext*) tidak pernah disimpan di kode JavaScript, DOM, localStorage, ataupun Firestore. Mahasiswa yang membuka *Inspect Element (DevTools)* hanya melihat hash satu arah 64-karakter.
+- **Sistem Pembatasan Percobaan (*Rate-Limiter & Lockout*)**:
+  - Dibatasi maksimal **5 kali percobaan salah berturut-turut**.
+  - Jika melampaui batas, sistem **mengunci form secara otomatis selama 3 menit (180 detik)** dengan *countdown timer* real-time dan input dinonaktifkan.
+  - Mencegah bot/skrip otomatis melakukan serangan brute-force kamus kata sandi.
+- **Pencegahan Pemborosan Kuota (*Read Caching with 15-Minute TTL*)**:
+  - Hash verifikasi disimpan dalam *in-memory cache* & *local storage* dengan batas waktu (TTL) 15 menit.
+  - Percobaan kata sandi yang berulang tidak memicu pembacaan dokumen (*read query*) berulang ke server Firestore, melindungi kuota baca paket gratis Spark.
+- **Sesi Aman**: Status login disimpan di `sessionStorage` (otomatis hangus saat tab browser ditutup).
 
 #### B. Pengelolaan Ruangan & Soal (CRUD Fleksibel)
 - **Visual Icon & Key Picker**: Dosen memilih ikon ruangan dari **18 tema bermain anak** dan **12 variasi kunci reward** secara visual (tanpa perlu mengetik teks emoji manual).
@@ -112,6 +117,34 @@ dunia-belajar-anak/
 │           └── SettingsTab.jsx      # Pengaturan ganti PIN dosen
 └── escape-room.html             # File HTML referensi asli
 ```
+
+---
+
+## 🛡️ Proteksi Database Firebase & Panduan Aturan Keamanan (Firestore Rules)
+
+Untuk mencegah pembengkakan kuota pembacaan/penulisan (*Denial of Wallet* / kehabisan kuota gratis harian Spark), proyek ini dilengkapi dengan berkas **`firestore.rules`** yang memvalidasi setiap transaksi langsung di server Google Firebase:
+
+1. **Validasi Skema & Batas Karakter**:
+   - Mahasiswa hanya dapat membuat dokumen nilai (`results`) jika panjang `nama` (2–60 karakter), panjang `nim` (4–30 karakter), dan `score` adalah angka 0–100.
+   - Bank soal (`content/rooms_data`) dibatasi maksimal 25 ruangan untuk mencegah pengisian data berlebih (*storage bloat*).
+   - Pembaruan PIN (`settings/security`) hanya menerima string hash SHA-256 tepat 64 karakter.
+2. **Kunci Immutability (Anti-Tamper Nilai)**:
+   - Dokumen nilai mahasiswa **tidak dapat diubah/diedit (`update: false`)** setelah dikirim.
+3. **Pencegahan Replay & Spam Submission**:
+   - Sisi klien dilengkapi generator `sessionId` unik per pengerjaan untuk memblokir submit ganda (*double-click* atau *looping script*).
+
+### 📋 Cara Menerapkan Aturan Keamanan di Firebase Console:
+1. Buka [Firebase Console](https://console.firebase.google.com/) dan pilih proyek Anda (`dunia-bermain-anak`).
+2. Masuk ke menu **Firestore Database** di bilah navigasi kiri.
+3. Klik tab **Rules** (Aturan).
+4. Salin seluruh isi berkas [`firestore.rules`](file:///c:/Project%20Source%20Code/dunia-belajar-anak/firestore.rules) dari repositori ini dan tempelkan (*paste*) menggantikan aturan lama.
+5. Klik tombol **Publish** (Publikasikan).
+
+> [!TIP]
+> Jika Anda menggunakan Firebase CLI di komputer, Anda juga dapat menerapkannya langsung melalui terminal dengan perintah:
+> ```bash
+> firebase deploy --only firestore:rules
+> ```
 
 ---
 

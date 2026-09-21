@@ -20,6 +20,11 @@ import SkyBackground from '../components/common/SkyBackground';
 import { getDosenPinHash, getRoomsFromDb } from '../firebase/config';
 import { verifyPin } from '../utils/crypto';
 import { defaultRooms } from '../data/defaultRooms';
+import {
+  getPinLockoutStatus,
+  recordFailedPinAttempt,
+  resetPinRateLimit
+} from '../utils/securityLimiter';
 
 export default function DosenPage({ rooms, onUpdateRooms }) {
   const navigate = useNavigate();
@@ -28,6 +33,7 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('questions'); // 'questions', 'results', 'settings'
+  const [lockout, setLockout] = useState(() => getPinLockoutStatus());
 
   // Periksa status login di sessionStorage (hanya aktif selama tab terbuka)
   useEffect(() => {
@@ -37,8 +43,32 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
     }
   }, []);
 
+  // Timer countdown jika sedang lockout
+  useEffect(() => {
+    if (!lockout.isLocked) return;
+
+    const timer = setInterval(() => {
+      const current = getPinLockoutStatus();
+      setLockout(current);
+      if (!current.isLocked) {
+        setError('');
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockout.isLocked]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // 1. Cek apakah sedang dalam kondisi lockout
+    const status = getPinLockoutStatus();
+    if (status.isLocked) {
+      setLockout(status);
+      setError(`Akses terkunci sementara. Silakan tunggu ${Math.ceil(status.remainingSeconds / 60)} menit lagi.`);
+      return;
+    }
+
     if (!pinInput.trim()) {
       setError('Masukkan kata sandi / PIN dosen.');
       return;
@@ -52,11 +82,19 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
       const isValid = await verifyPin(pinInput.trim(), storedHash);
 
       if (isValid) {
+        resetPinRateLimit();
+        setLockout(getPinLockoutStatus());
         sessionStorage.setItem('dosen_auth_session', 'true');
         setIsAuthenticated(true);
         setPinInput('');
       } else {
-        setError('Kata sandi salah. Silakan periksa kembali.');
+        const updatedStatus = recordFailedPinAttempt();
+        setLockout(updatedStatus);
+        if (updatedStatus.isLocked) {
+          setError('Terlalu banyak percobaan salah! Akses terkunci selama 3 menit demi keamanan.');
+        } else {
+          setError(`Kata sandi salah. Sisa kesempatan: ${updatedStatus.attemptsLeft} kali sebelum terkunci.`);
+        }
       }
     } catch (err) {
       setError('Terjadi kendala memverifikasi sandi: ' + err.message);
@@ -179,6 +217,45 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
             </div>
 
             <form onSubmit={handleLogin}>
+              {/* Alert jika terkunci (Lockout Brute Force) */}
+              {lockout.isLocked ? (
+                <div style={{
+                  background: '#fef2f2',
+                  border: '2px solid #ef4444',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '16px',
+                  marginBottom: '18px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px'
+                }}>
+                  <AlertCircle size={24} color="#dc2626" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <div>
+                    <div style={{ fontWeight: 800, color: '#991b1b', fontSize: '1.02em', marginBottom: '4px' }}>
+                      Akses Terkunci Sementara (Anti Brute-Force)
+                    </div>
+                    <div style={{ fontSize: '0.88em', color: '#b91c1c', lineHeight: 1.5 }}>
+                      Terlalu banyak percobaan sandi yang salah. Untuk melindungi data dosen & database, sistem dikunci selama:
+                    </div>
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginTop: '8px',
+                      background: 'white',
+                      border: '1px solid #fca5a5',
+                      padding: '6px 14px',
+                      borderRadius: '8px',
+                      fontWeight: 800,
+                      fontSize: '1.15em',
+                      color: '#991b1b'
+                    }}>
+                      ⏱️ {Math.floor(lockout.remainingSeconds / 60)}:{(lockout.remainingSeconds % 60).toString().padStart(2, '0')}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
               <div className="form-group">
                 <label className="form-label" htmlFor="dosen-page-pin">
                   Kata Sandi / PIN Dosen
@@ -187,14 +264,15 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
                   id="dosen-page-pin"
                   type="password"
                   className="form-input"
-                  placeholder="Masukkan kata sandi dosen..."
+                  placeholder={lockout.isLocked ? "Terkunci sementara..." : "Masukkan kata sandi dosen..."}
                   value={pinInput}
                   onChange={(e) => { setPinInput(e.target.value); setError(''); }}
-                  autoFocus
+                  disabled={loading || lockout.isLocked}
+                  autoFocus={!lockout.isLocked}
                 />
               </div>
 
-              {error && (
+              {error && !lockout.isLocked && (
                 <div className="feedback-box no" style={{ marginBottom: '16px' }}>
                   <AlertCircle size={18} />
                   <span>{error}</span>
@@ -205,29 +283,45 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
                 background: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: 'var(--radius-sm)',
-                padding: '10px 14px',
+                padding: '12px 14px',
                 fontSize: '0.84em',
                 color: 'var(--gray)',
                 marginBottom: '20px',
                 display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                flexDirection: 'column',
+                gap: '6px'
               }}>
-                <ShieldCheck size={18} color="var(--green-dark)" style={{ flexShrink: 0 }} />
-                <span>
-                  <b>Keamanan Terjamin:</b> Password diverifikasi menggunakan kriptografi SHA-256 dengan salt rahasia sehingga tidak dapat dibaca dari Inspect Element.
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheck size={18} color="var(--green-dark)" style={{ flexShrink: 0 }} />
+                  <span>
+                    <b>Proteksi Kriptografi:</b> Sandi diverifikasi via salted SHA-256 (kebal Inspect Element).
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Lock size={16} color="var(--purple)" style={{ flexShrink: 0 }} />
+                  <span>
+                    <b>Proteksi Brute-Force:</b> Maksimal 5x percobaan salah. Jika melebihi batas, akses terkunci otomatis selama 3 menit.
+                  </span>
+                </div>
               </div>
 
               <div className="btnrow" style={{ flexDirection: 'column' }}>
                 <button
                   type="submit"
                   className="main-btn"
-                  disabled={loading}
-                  style={{ background: 'var(--purple)', boxShadow: '0 6px 0 var(--purple-dark)' }}
+                  disabled={loading || lockout.isLocked}
+                  style={{
+                    background: lockout.isLocked ? '#94a3b8' : 'var(--purple)',
+                    boxShadow: lockout.isLocked ? 'none' : '0 6px 0 var(--purple-dark)',
+                    cursor: lockout.isLocked ? 'not-allowed' : 'pointer'
+                  }}
                 >
                   <KeyRound size={18} />
-                  {loading ? 'Memverifikasi Sandi...' : 'Buka Dashboard Manajemen'}
+                  {loading
+                    ? 'Memverifikasi Sandi...'
+                    : lockout.isLocked
+                    ? `Akses Terkunci (${Math.floor(lockout.remainingSeconds / 60)}:${(lockout.remainingSeconds % 60).toString().padStart(2, '0')})`
+                    : 'Buka Dashboard Manajemen'}
                 </button>
 
                 <div style={{ textAlign: 'center', marginTop: '10px' }}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { Trophy, RotateCcw, CheckCircle2, AlertTriangle, BookOpen } from 'lucide-react';
 import { saveStudentResult } from '../../firebase/config';
@@ -14,6 +14,7 @@ export default function VictoryCard({
   onRestart
 }) {
   const [saveStatus, setSaveStatus] = useState({ loading: true, success: false, msg: 'Menyimpan hasil ke database...' });
+  const hasSubmittedRef = useRef(false);
 
   const scoreRounded = Math.round(totalScore * 100) / 100;
 
@@ -43,16 +44,26 @@ export default function VictoryCard({
       console.log('Confetti not available:', e);
     }
 
-    // Simpan hasil pengerjaan ke database Firestore
+    // Simpan hasil pengerjaan ke database Firestore (hanya 1 kali per sesi pengerjaan)
     const submitResult = async () => {
+      if (hasSubmittedRef.current) return;
+      hasSubmittedRef.current = true;
+
       try {
+        const studentName = student.name || student.nama || 'Mahasiswa';
+        const studentNim = student.nim || '-';
+        const uniqueSessionId = student.sessionId || `session_${studentNim}_${Date.now()}`;
+
         const record = {
-          name: student.name,
-          nim: student.nim,
+          nama: studentName,
+          name: studentName,
+          nim: studentNim,
           score: scoreRounded,
           correct: totalCorrect,
           totalLocks: totalLocks,
-          answers: answersRecord,
+          totalRooms: rooms ? rooms.length : 3,
+          answers: answersRecord || [],
+          sessionId: uniqueSessionId,
           timestamp: new Date().toISOString()
         };
 

@@ -14,6 +14,11 @@ import {
 } from 'firebase/firestore';
 import { defaultRooms } from '../data/defaultRooms';
 import { hashPin, DEFAULT_PIN_HASH } from '../utils/crypto';
+import {
+  isSessionAlreadySubmitted,
+  markSessionSubmitted,
+  validateStudentPayload
+} from '../utils/securityLimiter';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCSwvwXrlr9nI7aFuNgY4JbEwJEqYJeb0k",
@@ -31,6 +36,12 @@ export const db = getFirestore(app);
 const LOCAL_STORAGE_ROOMS_KEY = 'dunia_bermain_rooms_cache';
 const LOCAL_STORAGE_RESULTS_KEY = 'dunia_bermain_results_cache';
 const LOCAL_STORAGE_HASH_KEY = 'dunia_bermain_security_hash';
+const LOCAL_STORAGE_HASH_TTL_KEY = 'dunia_bermain_security_hash_ttl';
+
+// In-memory cache untuk PIN hash agar tidak memicu Firestore read berulang saat brute force
+let inMemoryPinHash = null;
+let inMemoryPinHashExpiresAt = 0;
+const PIN_HASH_TTL_MS = 15 * 60 * 1000; // 15 menit
 
 /**
  * Mengambil data seluruh ruangan & soal dari Firestore.
@@ -98,10 +109,33 @@ export async function resetRoomsInDb() {
  * Menyimpan hasil pengerjaan mahasiswa ke koleksi 'results'
  */
 export async function saveStudentResult(record) {
+  // 1. Validasi integritas payload data sebelum dikirim
+  const validation = validateStudentPayload(record);
+  if (!validation.valid) {
+    console.warn("Payload mahasiswa tidak valid:", validation.error);
+    return { success: false, error: validation.error };
+  }
+
+  // 2. Proteksi submit ganda / spamming token sesi
+  if (record.sessionId && isSessionAlreadySubmitted(record.sessionId)) {
+    console.warn("Sesi pengerjaan ini sudah pernah terkirim sebelumnya.");
+    return { success: true, duplicate: true };
+  }
+
+  const sanitizedRecord = {
+    nama: String(record.nama || '').trim().slice(0, 60),
+    nim: String(record.nim || '').trim().slice(0, 30),
+    score: Math.max(0, Math.min(100, Math.round(Number(record.score) || 0))),
+    totalRooms: Number(record.totalRooms) || 3,
+    answers: Array.isArray(record.answers) ? record.answers.slice(0, 30) : [],
+    sessionId: record.sessionId || null,
+    submittedAt: new Date().toISOString()
+  };
+
   // Simpan ke local cache juga sebagai backup
   try {
     const localRes = JSON.parse(localStorage.getItem(LOCAL_STORAGE_RESULTS_KEY) || '[]');
-    localRes.unshift({ ...record, id: 'local-' + Date.now() });
+    localRes.unshift({ ...sanitizedRecord, id: 'local-' + Date.now() });
     localStorage.setItem(LOCAL_STORAGE_RESULTS_KEY, JSON.stringify(localRes));
   } catch (e) {
     console.error(e);
@@ -109,12 +143,20 @@ export async function saveStudentResult(record) {
 
   try {
     const docRef = await addDoc(collection(db, 'results'), {
-      ...record,
+      ...sanitizedRecord,
       createdAt: serverTimestamp()
     });
+
+    if (record.sessionId) {
+      markSessionSubmitted(record.sessionId);
+    }
+
     return { success: true, id: docRef.id };
   } catch (err) {
     console.warn("Gagal menyimpan ke Firestore online:", err.message);
+    if (record.sessionId) {
+      markSessionSubmitted(record.sessionId);
+    }
     return { success: false, error: err.message };
   }
 }
@@ -170,31 +212,61 @@ export async function deleteStudentResult(id) {
 
 /**
  * Mengambil Hash SHA-256 PIN Dosen aktif.
- * Password tidak pernah disimpan dalam bentuk teks polos (plaintext).
+ * Menggunakan in-memory & localStorage cache ber-TTL 15 menit agar brute force
+ * tidak memboroskan kuota read Firestore.
  */
-export async function getDosenPinHash() {
+export async function getDosenPinHash(forceRefresh = false) {
+  const now = Date.now();
+
+  // 1. Cek in-memory cache jika masih berlaku
+  if (!forceRefresh && inMemoryPinHash && now < inMemoryPinHashExpiresAt) {
+    return inMemoryPinHash;
+  }
+
+  // 2. Cek localStorage TTL cache jika masih berlaku
+  const cachedHash = localStorage.getItem(LOCAL_STORAGE_HASH_KEY);
+  const cachedTtl = parseInt(localStorage.getItem(LOCAL_STORAGE_HASH_TTL_KEY) || '0', 10);
+  if (!forceRefresh && cachedHash && now < cachedTtl) {
+    inMemoryPinHash = cachedHash;
+    inMemoryPinHashExpiresAt = cachedTtl;
+    return cachedHash;
+  }
+
+  // 3. Hanya jika cache kadaluarsa atau dipaksa refresh, lakukan read ke Firestore
   try {
     const docRef = doc(db, 'settings', 'security');
     const docSnap = await getDoc(docRef);
     if (docSnap.exists() && docSnap.data().pinHash) {
       const hash = docSnap.data().pinHash;
+      inMemoryPinHash = hash;
+      inMemoryPinHashExpiresAt = now + PIN_HASH_TTL_MS;
       localStorage.setItem(LOCAL_STORAGE_HASH_KEY, hash);
+      localStorage.setItem(LOCAL_STORAGE_HASH_TTL_KEY, inMemoryPinHashExpiresAt.toString());
       return hash;
     }
   } catch (err) {
     console.warn("Gagal membaca hash keamanan dari Firestore:", err.message);
   }
 
-  return localStorage.getItem(LOCAL_STORAGE_HASH_KEY) || DEFAULT_PIN_HASH;
+  // 4. Fallback ke hash lokal atau default
+  const fallback = cachedHash || DEFAULT_PIN_HASH;
+  inMemoryPinHash = fallback;
+  inMemoryPinHashExpiresAt = now + PIN_HASH_TTL_MS;
+  return fallback;
 }
 
 /**
  * Memperbarui PIN Dosen.
- * Hanya menyimpan hasil hash kriptografi SHA-256, bukan password asli.
+ * Hanya menyimpan hasil hash kriptografi SHA-256 dan memperbarui cache.
  */
 export async function updateDosenPinHash(newPin) {
   const hash = await hashPin(newPin);
+  const now = Date.now();
+
+  inMemoryPinHash = hash;
+  inMemoryPinHashExpiresAt = now + PIN_HASH_TTL_MS;
   localStorage.setItem(LOCAL_STORAGE_HASH_KEY, hash);
+  localStorage.setItem(LOCAL_STORAGE_HASH_TTL_KEY, inMemoryPinHashExpiresAt.toString());
 
   // Bersihkan key lama jika ada
   localStorage.removeItem('dunia_bermain_dosen_pin');
