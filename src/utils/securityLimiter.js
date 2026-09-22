@@ -128,7 +128,7 @@ export function validateStudentPayload(record) {
     return { valid: false, error: 'Format data pengerjaan tidak valid.' };
   }
 
-  const nama = String(record.nama || '').trim();
+  const nama = String(record.nama || record.name || '').trim();
   const nim = String(record.nim || '').trim();
   const score = Number(record.score);
 

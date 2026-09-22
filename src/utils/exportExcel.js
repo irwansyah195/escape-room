@@ -12,14 +12,22 @@ export function exportToExcel(records) {
   }
 
   // Sheet 1: Rekap Nilai
-  const summaryData = records.map(r => ({
-    "Nama Lengkap": r.name,
-    "NIM": r.nim,
-    "Skor Akhir": r.score,
-    "Jumlah Benar": r.correct,
-    "Total Soal": r.totalLocks,
-    "Waktu Selesai": r.timestamp ? new Date(r.timestamp).toLocaleString('id-ID') : '-'
-  }));
+  const summaryData = records.map(r => {
+    const studentName = r.name || r.nama || '-';
+    const correct = r.correct !== undefined ? r.correct : (Array.isArray(r.answers) ? r.answers.filter(a => a.isSolved).length : 0);
+    const totalLocks = r.totalLocks !== undefined ? r.totalLocks : (Array.isArray(r.answers) && r.answers.length > 0 ? r.answers.length : 12);
+    const timeVal = r.timestamp || r.submittedAt;
+    const timeStr = timeVal ? new Date(timeVal).toLocaleString('id-ID') : '-';
+
+    return {
+      "Nama Lengkap": studentName,
+      "NIM": r.nim,
+      "Skor Akhir": r.score,
+      "Jumlah Benar": correct,
+      "Total Soal": totalLocks,
+      "Waktu Selesai": timeStr
+    };
+  });
 
   const wsSummary = XLSX.utils.json_to_sheet(summaryData);
   wsSummary['!cols'] = [
@@ -37,9 +45,10 @@ export function exportToExcel(records) {
   // Sheet 2: Detail Jawaban Per Soal
   const detailData = [];
   records.forEach(r => {
+    const studentName = r.name || r.nama || '-';
     (r.answers || []).forEach(a => {
       detailData.push({
-        "Nama": r.name,
+        "Nama": studentName,
         "NIM": r.nim,
         "Ruangan": a.room,
         "Soal / Gembok": a.question,
@@ -80,8 +89,12 @@ export function exportToCSV(records) {
 
   let csv = "Nama,NIM,Skor,Benar,Total Soal,Waktu\n";
   records.forEach(r => {
-    const timeStr = r.timestamp ? new Date(r.timestamp).toLocaleString('id-ID') : '-';
-    csv += `"${(r.name || '').replace(/"/g, '""')}","${(r.nim || '').replace(/"/g, '""')}",${r.score},${r.correct},${r.totalLocks},"${timeStr}"\n`;
+    const studentName = r.name || r.nama || '-';
+    const correct = r.correct !== undefined ? r.correct : (Array.isArray(r.answers) ? r.answers.filter(a => a.isSolved).length : 0);
+    const totalLocks = r.totalLocks !== undefined ? r.totalLocks : (Array.isArray(r.answers) && r.answers.length > 0 ? r.answers.length : 12);
+    const timeVal = r.timestamp || r.submittedAt;
+    const timeStr = timeVal ? new Date(timeVal).toLocaleString('id-ID') : '-';
+    csv += `"${studentName.replace(/"/g, '""')}","${(r.nim || '').replace(/"/g, '""')}",${r.score},${correct},${totalLocks},"${timeStr}"\n`;
   });
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

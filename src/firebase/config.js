@@ -106,6 +106,54 @@ export async function resetRoomsInDb() {
 }
 
 /**
+ * Normalisasi data pengerjaan mahasiswa agar kompatibel dengan data lama & baru di Firestore
+ */
+export function normalizeStudentRecord(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+
+  const name = raw.name || raw.nama || 'Mahasiswa';
+  const nama = raw.nama || raw.name || 'Mahasiswa';
+  const answers = Array.isArray(raw.answers) ? raw.answers : [];
+
+  // Hitung jumlah benar jika tidak ada field 'correct' langsung
+  let correct = raw.correct;
+  if (correct === undefined || correct === null) {
+    correct = answers.filter(a => a.isSolved).length;
+  } else {
+    correct = Number(correct) || 0;
+  }
+
+  // Hitung total locks jika tidak ada field 'totalLocks' langsung
+  let totalLocks = raw.totalLocks;
+  if (totalLocks === undefined || totalLocks === null) {
+    totalLocks = answers.length > 0 ? answers.length : ((raw.totalRooms || 3) * 3);
+  } else {
+    totalLocks = Number(totalLocks) || 0;
+  }
+
+  // Ambil timestamp dari timestamp, submittedAt, atau createdAt (Firestore Timestamp)
+  let timestamp = raw.timestamp || raw.submittedAt;
+  if (!timestamp && raw.createdAt) {
+    if (typeof raw.createdAt.toDate === 'function') {
+      timestamp = raw.createdAt.toDate().toISOString();
+    } else if (raw.createdAt.seconds) {
+      timestamp = new Date(raw.createdAt.seconds * 1000).toISOString();
+    }
+  }
+
+  return {
+    ...raw,
+    name,
+    nama,
+    correct,
+    totalLocks,
+    timestamp: timestamp || new Date().toISOString(),
+    submittedAt: raw.submittedAt || timestamp || new Date().toISOString(),
+    answers
+  };
+}
+
+/**
  * Menyimpan hasil pengerjaan mahasiswa ke koleksi 'results'
  */
 export async function saveStudentResult(record) {
@@ -122,14 +170,19 @@ export async function saveStudentResult(record) {
     return { success: true, duplicate: true };
   }
 
+  const nowIso = new Date().toISOString();
   const sanitizedRecord = {
-    nama: String(record.nama || '').trim().slice(0, 60),
+    nama: String(record.nama || record.name || '').trim().slice(0, 60),
+    name: String(record.name || record.nama || '').trim().slice(0, 60),
     nim: String(record.nim || '').trim().slice(0, 30),
     score: Math.max(0, Math.min(100, Math.round(Number(record.score) || 0))),
+    correct: Number(record.correct) || (Array.isArray(record.answers) ? record.answers.filter(a => a.isSolved).length : 0),
+    totalLocks: Number(record.totalLocks) || (Array.isArray(record.answers) && record.answers.length > 0 ? record.answers.length : 12),
     totalRooms: Number(record.totalRooms) || 3,
-    answers: Array.isArray(record.answers) ? record.answers.slice(0, 30) : [],
+    answers: Array.isArray(record.answers) ? record.answers.slice(0, 50) : [],
     sessionId: record.sessionId || null,
-    submittedAt: new Date().toISOString()
+    submittedAt: nowIso,
+    timestamp: nowIso
   };
 
   // Simpan ke local cache juga sebagai backup
@@ -170,7 +223,7 @@ export async function getStudentResults() {
     const snap = await getDocs(q);
     const records = [];
     snap.forEach(d => {
-      records.push({ id: d.id, ...d.data() });
+      records.push(normalizeStudentRecord({ id: d.id, ...d.data() }));
     });
 
     if (records.length > 0) {
@@ -183,7 +236,15 @@ export async function getStudentResults() {
 
   // Fallback ke local cache
   const localRes = localStorage.getItem(LOCAL_STORAGE_RESULTS_KEY);
-  return localRes ? JSON.parse(localRes) : [];
+  if (localRes) {
+    try {
+      const parsed = JSON.parse(localRes);
+      return (Array.isArray(parsed) ? parsed : []).map(normalizeStudentRecord);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return [];
 }
 
 /**

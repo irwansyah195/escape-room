@@ -15,7 +15,7 @@ export default function ResultDetailModal({ record, onClose }) {
               🔍 Rincian Pengerjaan Mahasiswa
             </h3>
             <div style={{ display: 'flex', gap: '14px', fontSize: '0.9em', color: 'var(--gray)' }}>
-              <span><b>Nama:</b> {record.name}</span>
+              <span><b>Nama:</b> {record.name || record.nama || '-'}</span>
               <span><b>NIM:</b> {record.nim}</span>
               <span><b>Skor:</b> <b style={{ color: 'var(--green-dark)' }}>{record.score}</b> / 100</span>
             </div>

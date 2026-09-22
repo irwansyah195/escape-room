@@ -16,7 +16,11 @@ export default function ResultRecap() {
     try {
       const data = await getStudentResults();
       // Urutkan berdasarkan waktu pengerjaan terbaru
-      data.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+      data.sort((a, b) => {
+        const timeA = new Date(a.timestamp || a.submittedAt || 0).getTime();
+        const timeB = new Date(b.timestamp || b.submittedAt || 0).getTime();
+        return timeB - timeA;
+      });
       setRecords(data);
     } catch (e) {
       console.error(e);
@@ -30,7 +34,8 @@ export default function ResultRecap() {
   }, []);
 
   const handleDelete = async (rec) => {
-    const confirmDelete = window.confirm(`Apakah Anda yakin ingin menghapus data nilai mahasiswa: "${rec.name}" (${rec.nim})?`);
+    const studentName = rec.name || rec.nama || 'Mahasiswa';
+    const confirmDelete = window.confirm(`Apakah Anda yakin ingin menghapus data nilai mahasiswa: "${studentName}" (${rec.nim})?`);
     if (!confirmDelete) return;
 
     setDeletingId(rec.id);
@@ -46,7 +51,9 @@ export default function ResultRecap() {
 
   const filteredRecords = records.filter(r => {
     const q = searchQuery.toLowerCase();
-    return (r.name || '').toLowerCase().includes(q) || (r.nim || '').toLowerCase().includes(q);
+    const studentName = (r.name || r.nama || '').toLowerCase();
+    const nim = (r.nim || '').toLowerCase();
+    return studentName.includes(q) || nim.includes(q);
   });
 
   // Statistik ringkas
@@ -203,7 +210,7 @@ export default function ResultRecap() {
             <tbody>
               {filteredRecords.map((rec) => (
                 <tr key={rec.id}>
-                  <td style={{ fontWeight: 700 }}>{rec.name}</td>
+                  <td style={{ fontWeight: 700 }}>{rec.name || rec.nama || '-'}</td>
                   <td style={{ color: 'var(--gray)', fontWeight: 600 }}>{rec.nim}</td>
                   <td style={{ textAlign: 'center' }}>
                     <span style={{
@@ -219,10 +226,18 @@ export default function ResultRecap() {
                     </span>
                   </td>
                   <td style={{ textAlign: 'center', fontWeight: 600 }}>
-                    {rec.correct} / {rec.totalLocks}
+                    {rec.correct !== undefined && rec.totalLocks !== undefined
+                      ? `${rec.correct} / ${rec.totalLocks}`
+                      : (Array.isArray(rec.answers) && rec.answers.length > 0
+                          ? `${rec.answers.filter(a => a.isSolved).length} / ${rec.answers.length}`
+                          : '-')}
                   </td>
                   <td style={{ fontSize: '0.85em', color: 'var(--gray)' }}>
-                    {rec.timestamp ? new Date(rec.timestamp).toLocaleString('id-ID') : '-'}
+                    {rec.timestamp
+                      ? new Date(rec.timestamp).toLocaleString('id-ID')
+                      : (rec.submittedAt
+                          ? new Date(rec.submittedAt).toLocaleString('id-ID')
+                          : '-')}
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <div style={{ display: 'inline-flex', gap: '6px' }}>
