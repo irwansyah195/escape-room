@@ -11,11 +11,15 @@ import {
   AlertCircle,
   Sparkles,
   Lock,
-  Gamepad2
+  Gamepad2,
+  Radio,
+  Flame
 } from 'lucide-react';
 import QuestionManager from '../components/dosen/QuestionManager';
+import RaceQuestionManager from '../components/dosen/RaceQuestionManager';
 import ResultRecap from '../components/dosen/ResultRecap';
 import SettingsTab from '../components/dosen/SettingsTab';
+import ClassSessionTab from '../components/dosen/ClassSessionTab';
 import SkyBackground from '../components/common/SkyBackground';
 import { getDosenPinHash, getRoomsFromDb } from '../firebase/config';
 import { verifyPin } from '../utils/crypto';
@@ -32,8 +36,20 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
   const [pinInput, setPinInput] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('questions'); // 'questions', 'results', 'settings'
+  const [activeTab, setActiveTab] = useState('sessions'); // Default ke Sesi Kelas Multiplayer
   const [lockout, setLockout] = useState(() => getPinLockoutStatus());
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Pantau status fullscreen browser agar bisa fokus murni ke proyektor
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   // Periksa status login di sessionStorage (hanya aktif selama tab terbuka)
   useEffect(() => {
@@ -112,15 +128,27 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
     <div style={{ minHeight: '100vh', position: 'relative' }}>
       <SkyBackground />
 
-      <div className="wrap" style={{ maxWidth: isAuthenticated ? '1060px' : '520px', transition: 'max-width 0.3s' }}>
-        {/* Top Navbar Dosen */}
+      <div
+        className="wrap"
+        style={{
+          maxWidth: isAuthenticated ? '100%' : '520px',
+          width: '100%',
+          padding: isFullscreen ? '6px 12px' : (isAuthenticated ? '16px 28px' : '24px 16px'),
+          boxSizing: 'border-box',
+          transition: 'all 0.3s'
+        }}
+      >
+        {/* Top Navbar Dosen (Sembunyikan saat mode proyektor fullscreen aktif) */}
         <header style={{
-          background: 'white',
+          display: isFullscreen ? 'none' : 'flex',
+          background: 'rgba(15, 23, 42, 0.82)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
           borderRadius: 'var(--radius-md)',
           padding: '14px 20px',
           marginBottom: '22px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-          display: 'flex',
+          border: '1px solid rgba(168, 85, 247, 0.35)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
@@ -141,11 +169,11 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
               <ShieldCheck size={22} />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '1.15em', color: 'var(--purple-dark)' }}>
+              <div style={{ fontWeight: 800, fontSize: '1.15em', color: '#c084fc' }}>
                 Portal Manajemen Dosen
               </div>
-              <div style={{ fontSize: '0.82em', color: 'var(--gray)' }}>
-                Escape Room: Dunia Bermain Anak
+              <div style={{ fontSize: '0.82em', color: '#94a3b8' }}>
+                Dunia Belajar Anak: Observasi Perkembangan
               </div>
             </div>
           </div>
@@ -208,10 +236,10 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
               }}>
                 <Lock size={32} color="var(--purple)" />
               </div>
-              <h2 style={{ margin: '0 0 6px', color: 'var(--purple-dark)', fontSize: '1.5em' }}>
+              <h2 style={{ margin: '0 0 6px', color: '#c084fc', fontSize: '1.5em' }}>
                 Masuk ke Panel Dosen
               </h2>
-              <p style={{ margin: 0, color: 'var(--gray)', fontSize: '0.92em', lineHeight: 1.5 }}>
+              <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.92em', lineHeight: 1.5 }}>
                 Silakan masukkan kata sandi dosen untuk mengelola ruangan, mengedit soal, dan mengunduh rekap nilai.
               </p>
             </div>
@@ -220,8 +248,8 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
               {/* Alert jika terkunci (Lockout Brute Force) */}
               {lockout.isLocked ? (
                 <div style={{
-                  background: '#fef2f2',
-                  border: '2px solid #ef4444',
+                  background: 'rgba(127, 29, 29, 0.75)',
+                  border: '1px solid #ef4444',
                   borderRadius: 'var(--radius-sm)',
                   padding: '16px',
                   marginBottom: '18px',
@@ -229,12 +257,12 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
                   alignItems: 'flex-start',
                   gap: '12px'
                 }}>
-                  <AlertCircle size={24} color="#dc2626" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <AlertCircle size={24} color="#fca5a5" style={{ flexShrink: 0, marginTop: '2px' }} />
                   <div>
-                    <div style={{ fontWeight: 800, color: '#991b1b', fontSize: '1.02em', marginBottom: '4px' }}>
+                    <div style={{ fontWeight: 800, color: '#fecaca', fontSize: '1.02em', marginBottom: '4px' }}>
                       Akses Terkunci Sementara (Anti Brute-Force)
                     </div>
-                    <div style={{ fontSize: '0.88em', color: '#b91c1c', lineHeight: 1.5 }}>
+                    <div style={{ fontSize: '0.88em', color: '#fca5a5', lineHeight: 1.5 }}>
                       Terlalu banyak percobaan sandi yang salah. Untuk melindungi data dosen & database, sistem dikunci selama:
                     </div>
                     <div style={{
@@ -242,13 +270,13 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
                       alignItems: 'center',
                       gap: '8px',
                       marginTop: '8px',
-                      background: 'white',
-                      border: '1px solid #fca5a5',
+                      background: 'rgba(15, 23, 42, 0.85)',
+                      border: '1px solid #ef4444',
                       padding: '6px 14px',
                       borderRadius: '8px',
                       fontWeight: 800,
                       fontSize: '1.15em',
-                      color: '#991b1b'
+                      color: '#fca5a5'
                     }}>
                       ⏱️ {Math.floor(lockout.remainingSeconds / 60)}:{(lockout.remainingSeconds % 60).toString().padStart(2, '0')}
                     </div>
@@ -280,19 +308,19 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
               )}
 
               <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
+                background: 'rgba(30, 41, 59, 0.65)',
+                border: '1px solid rgba(148, 163, 184, 0.25)',
                 borderRadius: 'var(--radius-sm)',
                 padding: '12px 14px',
                 fontSize: '0.84em',
-                color: 'var(--gray)',
+                color: '#cbd5e1',
                 marginBottom: '20px',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '6px'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldCheck size={18} color="var(--green-dark)" style={{ flexShrink: 0 }} />
+                  <ShieldCheck size={18} color="var(--green)" style={{ flexShrink: 0 }} />
                   <span>
                     <b>Proteksi Kriptografi:</b> Sandi diverifikasi via salted SHA-256 (kebal Inspect Element).
                   </span>
@@ -347,16 +375,52 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
           /* ========================================================= */
           /* DASHBOARD PENUH HALAMAN TERPISAH                          */
           /* ========================================================= */
-          <div className="game-card" style={{ padding: 'clamp(18px, 3.5vw, 32px)' }}>
-            {/* Tab Navigasi Halaman */}
-            <div className="dosen-tabs" style={{ marginBottom: '24px' }}>
+          <div
+            className="game-card"
+            style={{
+              padding: isFullscreen ? '0' : 'clamp(18px, 3.5vw, 32px)',
+              minHeight: isFullscreen ? '100vh' : '75vh',
+              overflow: 'visible',
+              background: isFullscreen ? 'transparent' : undefined,
+              border: isFullscreen ? 'none' : undefined,
+              boxShadow: isFullscreen ? 'none' : undefined
+            }}
+          >
+            {/* Tab Navigasi Halaman (Sembunyikan saat mode proyektor fullscreen aktif) */}
+            <div className="dosen-tabs" style={{ display: isFullscreen ? 'none' : 'flex', marginBottom: '24px' }}>
+              <button
+                type="button"
+                className={`dosen-tab-btn ${activeTab === 'sessions' ? 'active' : ''}`}
+                onClick={() => setActiveTab('sessions')}
+                style={{
+                  background: activeTab === 'sessions' ? 'var(--purple)' : undefined,
+                  color: activeTab === 'sessions' ? 'white' : undefined
+                }}
+              >
+                <Radio size={18} />
+                <span>Sesi Kelas Multiplayer</span>
+              </button>
+
               <button
                 type="button"
                 className={`dosen-tab-btn ${activeTab === 'questions' ? 'active' : ''}`}
                 onClick={() => setActiveTab('questions')}
               >
                 <BookOpen size={18} />
-                <span>Kelola Ruangan & Soal</span>
+                <span>Kelola Ruangan Eksplorasi</span>
+              </button>
+
+              <button
+                type="button"
+                className={`dosen-tab-btn ${activeTab === 'race_questions' ? 'active' : ''}`}
+                onClick={() => setActiveTab('race_questions')}
+                style={{
+                  background: activeTab === 'race_questions' ? 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' : undefined,
+                  color: activeTab === 'race_questions' ? 'white' : undefined
+                }}
+              >
+                <Flame size={18} />
+                <span>Bank Soal Balap (Quiz Race)</span>
               </button>
 
               <button
@@ -380,8 +444,16 @@ export default function DosenPage({ rooms, onUpdateRooms }) {
 
             {/* Isi Konten Tab */}
             <div>
+              {activeTab === 'sessions' && (
+                <ClassSessionTab rooms={rooms} />
+              )}
+
               {activeTab === 'questions' && (
                 <QuestionManager rooms={rooms} onUpdateRooms={onUpdateRooms} />
+              )}
+
+              {activeTab === 'race_questions' && (
+                <RaceQuestionManager />
               )}
 
               {activeTab === 'results' && (

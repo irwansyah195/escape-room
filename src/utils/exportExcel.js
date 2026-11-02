@@ -75,7 +75,8 @@ export function exportToExcel(records) {
     XLSX.utils.book_append_sheet(wb, wsDetail, "Detail Jawaban");
   }
 
-  XLSX.writeFile(wb, "rekap_nilai_escape_room.xlsx");
+  const dateStr = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `rekap_nilai_mahasiswa_${dateStr}.xlsx`);
 }
 
 /**
@@ -101,7 +102,8 @@ export function exportToCSV(records) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'rekap_nilai_escape_room.csv';
+  const dateStr = new Date().toISOString().slice(0, 10);
+  a.download = `rekap_nilai_mahasiswa_${dateStr}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

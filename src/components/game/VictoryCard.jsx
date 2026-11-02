@@ -60,11 +60,17 @@ export default function VictoryCard({
           nim: studentNim,
           score: scoreRounded,
           correct: totalCorrect,
+          totalCorrect: totalCorrect,
           totalLocks: totalLocks,
+          totalQuestions: totalLocks,
           totalRooms: rooms ? rooms.length : 3,
+          sessionMode: student.sessionMode || 'quiz_race',
+          sessionPin: student.sessionPin || null,
           answers: answersRecord || [],
+          answersRecord: answersRecord || [],
           sessionId: uniqueSessionId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          submittedAt: new Date().toISOString()
         };
 
         const res = await saveStudentResult(record);
@@ -85,10 +91,10 @@ export default function VictoryCard({
   return (
     <div className="game-card final-card">
       <div className="final-emoji">🏆🎈</div>
-      <h2 style={{ color: 'var(--purple-dark)', margin: '0 0 4px', fontSize: '1.8em' }}>
+      <h2 style={{ color: '#c084fc', margin: '0 0 4px', fontSize: '1.8em' }}>
         Selamat, {student.name}!
       </h2>
-      <p style={{ color: 'var(--gray)', margin: '0 0 16px', fontWeight: 600 }}>
+      <p style={{ color: '#94a3b8', margin: '0 0 16px', fontWeight: 600 }}>
         NIM: {student.nim}
       </p>
 
@@ -104,17 +110,17 @@ export default function VictoryCard({
         🌟 Total Skor Kamu: {scoreRounded} / 100
       </div>
 
-      <p style={{ fontSize: '1.05em', margin: '14px 0' }}>
+      <p style={{ fontSize: '1.05em', margin: '14px 0', color: '#e2e8f0' }}>
         Kamu menjawab benar <b>{totalCorrect} dari {totalLocks}</b> gembok (skor dipengaruhi jumlah percobaan tiap soal).
       </p>
 
       {/* Ringkasan Pembelajaran */}
       <div className="summary-edu-box">
-        <div style={{ fontWeight: 700, color: 'var(--purple-dark)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+        <div style={{ fontWeight: 700, color: '#c084fc', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
           <BookOpen size={18} />
           <span>Refleksi Teori Bermain Anak:</span>
         </div>
-        <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: 1.6 }}>
+        <ul style={{ margin: 0, paddingLeft: '20px', lineHeight: 1.6, color: '#cbd5e1' }}>
           <li><b>Parallel & Constructive Play</b>: Anak bermain mandiri berdampingan dan menyusun media menjadi struktur.</li>
           <li><b>Cooperative & Sociodramatic Play</b>: Pembagian peran terkoordinasi dan alur cerita yang disepakati bersama.</li>
           <li><b>Games with Rules</b>: Puncak kematangan sosial (Parten & Piaget) dengan kepatuhan giliran dan regulasi diri.</li>
@@ -129,8 +135,9 @@ export default function VictoryCard({
         margin: '12px 0 20px',
         padding: '8px 16px',
         borderRadius: 'var(--radius-full)',
-        background: saveStatus.success ? 'var(--green-light)' : '#fef3c7',
-        color: saveStatus.success ? 'var(--green-dark)' : '#b45309',
+        background: saveStatus.success ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+        color: saveStatus.success ? '#6ee7b7' : '#fde047',
+        border: `1px solid ${saveStatus.success ? 'rgba(16, 185, 129, 0.4)' : 'rgba(245, 158, 11, 0.4)'}`,
         fontSize: '0.92em',
         fontWeight: 600
       }}>

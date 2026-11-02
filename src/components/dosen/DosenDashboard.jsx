@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, BookOpen, Users, Settings, ShieldCheck, LogOut } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { X, BookOpen, Users, Settings, ShieldCheck, LogOut, Flame } from 'lucide-react';
 import QuestionManager from './QuestionManager';
+import RaceQuestionManager from './RaceQuestionManager';
 import ResultRecap from './ResultRecap';
 import SettingsTab from './SettingsTab';
 
@@ -9,8 +11,8 @@ export default function DosenDashboard({ isOpen, onClose, rooms, onUpdateRooms }
 
   if (!isOpen) return null;
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
+  return createPortal(
+    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 9999 }}>
       <div
         className="modal-card"
         style={{ maxWidth: '960px', width: '95%', maxHeight: '92vh', padding: 'clamp(16px, 3.5vw, 28px)' }}
@@ -64,7 +66,20 @@ export default function DosenDashboard({ isOpen, onClose, rooms, onUpdateRooms }
             onClick={() => setActiveTab('questions')}
           >
             <BookOpen size={18} />
-            <span>Kelola Ruangan & Soal</span>
+            <span>Kelola Ruangan (Escape Room)</span>
+          </button>
+
+          <button
+            type="button"
+            className={`dosen-tab-btn ${activeTab === 'race_questions' ? 'active' : ''}`}
+            onClick={() => setActiveTab('race_questions')}
+            style={{
+              background: activeTab === 'race_questions' ? 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' : undefined,
+              color: activeTab === 'race_questions' ? 'white' : undefined
+            }}
+          >
+            <Flame size={18} />
+            <span>Bank Soal Balap</span>
           </button>
 
           <button
@@ -92,6 +107,10 @@ export default function DosenDashboard({ isOpen, onClose, rooms, onUpdateRooms }
             <QuestionManager rooms={rooms} onUpdateRooms={onUpdateRooms} />
           )}
 
+          {activeTab === 'race_questions' && (
+            <RaceQuestionManager />
+          )}
+
           {activeTab === 'results' && (
             <ResultRecap />
           )}
@@ -101,6 +120,7 @@ export default function DosenDashboard({ isOpen, onClose, rooms, onUpdateRooms }
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

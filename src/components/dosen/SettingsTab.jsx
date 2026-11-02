@@ -54,8 +54,8 @@ export default function SettingsTab() {
   return (
     <div style={{ maxWidth: '480px', margin: '0 auto', textAlign: 'left' }}>
       <div style={{
-        background: 'var(--purple-light)',
-        border: '1px solid #e9d5ff',
+        background: 'rgba(168, 85, 247, 0.15)',
+        border: '1px solid rgba(168, 85, 247, 0.3)',
         borderRadius: 'var(--radius-md)',
         padding: '16px',
         marginBottom: '20px',
@@ -63,12 +63,12 @@ export default function SettingsTab() {
         gap: '12px',
         alignItems: 'flex-start'
       }}>
-        <ShieldCheck size={24} color="var(--purple-dark)" style={{ flexShrink: 0, marginTop: '2px' }} />
+        <ShieldCheck size={24} color="#c084fc" style={{ flexShrink: 0, marginTop: '2px' }} />
         <div>
-          <div style={{ fontWeight: 700, color: 'var(--purple-dark)', marginBottom: '4px' }}>
+          <div style={{ fontWeight: 700, color: '#c084fc', marginBottom: '4px' }}>
             Keamanan Akses Dosen
           </div>
-          <div style={{ fontSize: '0.9em', color: '#475569', lineHeight: 1.5 }}>
+          <div style={{ fontSize: '0.9em', color: '#cbd5e1', lineHeight: 1.5 }}>
             Gunakan menu ini untuk mengganti kata sandi akses dosen agar mahasiswa tidak dapat mengubah soal atau melihat rekapitulasi nilai.
           </div>
         </div>

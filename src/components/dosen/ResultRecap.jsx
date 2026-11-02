@@ -75,46 +75,46 @@ export default function ResultRecap() {
         marginBottom: '20px'
       }}>
         <div style={{
-          background: 'var(--blue-light)',
+          background: 'rgba(56, 189, 248, 0.15)',
           padding: '14px 18px',
           borderRadius: 'var(--radius-md)',
-          border: '1px solid #bfdbfe'
+          border: '1px solid rgba(56, 189, 248, 0.3)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1e40af', fontSize: '0.88em', fontWeight: 700 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', fontSize: '0.88em', fontWeight: 700 }}>
             <Users size={18} />
             <span>Total Mengerjakan</span>
           </div>
-          <div style={{ fontSize: '1.6em', fontWeight: 800, color: 'var(--dark)', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.6em', fontWeight: 800, color: '#f8fafc', marginTop: '4px' }}>
             {totalSubmissions}
           </div>
         </div>
 
         <div style={{
-          background: 'var(--purple-light)',
+          background: 'rgba(168, 85, 247, 0.15)',
           padding: '14px 18px',
           borderRadius: 'var(--radius-md)',
-          border: '1px solid #e9d5ff'
+          border: '1px solid rgba(168, 85, 247, 0.3)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--purple-dark)', fontSize: '0.88em', fontWeight: 700 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#c084fc', fontSize: '0.88em', fontWeight: 700 }}>
             <TrendingUp size={18} />
             <span>Rata-rata Nilai</span>
           </div>
-          <div style={{ fontSize: '1.6em', fontWeight: 800, color: 'var(--dark)', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.6em', fontWeight: 800, color: '#f8fafc', marginTop: '4px' }}>
             {avgScore}
           </div>
         </div>
 
         <div style={{
-          background: 'var(--green-light)',
+          background: 'rgba(16, 185, 129, 0.15)',
           padding: '14px 18px',
           borderRadius: 'var(--radius-md)',
-          border: '1px solid #bbf7d0'
+          border: '1px solid rgba(16, 185, 129, 0.3)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--green-dark)', fontSize: '0.88em', fontWeight: 700 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6ee7b7', fontSize: '0.88em', fontWeight: 700 }}>
             <Award size={18} />
             <span>Skor Tertinggi</span>
           </div>
-          <div style={{ fontSize: '1.6em', fontWeight: 800, color: 'var(--dark)', marginTop: '4px' }}>
+          <div style={{ fontSize: '1.6em', fontWeight: 800, color: '#f8fafc', marginTop: '4px' }}>
             {maxScore}
           </div>
         </div>
@@ -228,16 +228,22 @@ export default function ResultRecap() {
                   <td style={{ textAlign: 'center', fontWeight: 600 }}>
                     {rec.correct !== undefined && rec.totalLocks !== undefined
                       ? `${rec.correct} / ${rec.totalLocks}`
-                      : (Array.isArray(rec.answers) && rec.answers.length > 0
-                          ? `${rec.answers.filter(a => a.isSolved).length} / ${rec.answers.length}`
-                          : '-')}
+                      : (rec.totalCorrect !== undefined && (rec.totalQuestions !== undefined || rec.totalLocks !== undefined)
+                          ? `${rec.totalCorrect} / ${rec.totalQuestions || rec.totalLocks}`
+                          : (Array.isArray(rec.answers) && rec.answers.length > 0
+                              ? `${rec.answers.filter(a => a.isSolved).length} / ${rec.answers.length}`
+                              : (Array.isArray(rec.answersRecord) && rec.answersRecord.length > 0
+                                  ? `${rec.answersRecord.filter(a => a.isSolved).length} / ${rec.answersRecord.length}`
+                                  : '-')))}
                   </td>
                   <td style={{ fontSize: '0.85em', color: 'var(--gray)' }}>
                     {rec.timestamp
                       ? new Date(rec.timestamp).toLocaleString('id-ID')
                       : (rec.submittedAt
                           ? new Date(rec.submittedAt).toLocaleString('id-ID')
-                          : '-')}
+                          : (rec.createdAt
+                              ? new Date(rec.createdAt).toLocaleString('id-ID')
+                              : '-'))}
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <div style={{ display: 'inline-flex', gap: '6px' }}>

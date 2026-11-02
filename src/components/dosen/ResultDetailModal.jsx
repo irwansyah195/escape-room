@@ -4,7 +4,13 @@ import { X, CheckCircle2, XCircle, UserCheck } from 'lucide-react';
 export default function ResultDetailModal({ record, onClose }) {
   if (!record) return null;
 
-  const answers = record.answers || [];
+  const answers = Array.isArray(record.answers) && record.answers.length > 0
+    ? record.answers
+    : (Array.isArray(record.answersRecord) && record.answersRecord.length > 0
+        ? record.answersRecord
+        : (Array.isArray(record.answers_record) && record.answers_record.length > 0
+            ? record.answers_record
+            : []));
 
   return (
     <div className="modal-overlay" onClick={onClose}>

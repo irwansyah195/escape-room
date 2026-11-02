@@ -1,15 +1,26 @@
 import React, { useState } from 'react';
-import { User, CreditCard, Sparkles, AlertCircle } from 'lucide-react';
+import {
+  User,
+  CreditCard,
+  Sparkles,
+  AlertCircle,
+  Radio,
+  LogIn
+} from 'lucide-react';
+import { verifyClassSession } from '../../utils/sessionSync';
 
 export default function StudentForm({ onStart }) {
   const [name, setName] = useState('');
   const [nim, setNim] = useState('');
+  const [pin, setPin] = useState('');
   const [error, setError] = useState('');
+  const [validatingPin, setValidatingPin] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const cleanName = name.trim();
     const cleanNim = nim.trim();
+    const cleanPin = pin.trim();
 
     if (!cleanName || !cleanNim) {
       setError('⚠️ Nama Lengkap dan NIM wajib diisi sebelum mulai.');
@@ -24,35 +35,61 @@ export default function StudentForm({ onStart }) {
       return;
     }
 
+    if (!cleanPin || cleanPin.length !== 6) {
+      setError('⚠️ Kode PIN Sesi Kelas (6 digit) wajib dimasukkan! Silakan minta kode PIN kepada Dosen Anda di depan kelas.');
+      return;
+    }
+
+    setValidatingPin(true);
+    let sessionInfo = null;
+    try {
+      sessionInfo = await verifyClassSession(cleanPin);
+    } catch (err) {
+      console.warn("Gagal memverifikasi sesi:", err);
+    } finally {
+      setValidatingPin(false);
+    }
+
+    if (!sessionInfo) {
+      setError(`⚠️ Kode PIN "${cleanPin}" tidak ditemukan atau sesi sudah ditutup oleh Dosen.`);
+      return;
+    }
+
     setError('');
     const uniqueSessionId = `sess_${cleanNim.replace(/[^a-zA-Z0-9]/g, '')}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    onStart({ name: cleanName, nim: cleanNim, sessionId: uniqueSessionId });
+    const isRace = sessionInfo.mode === 'quiz_race';
+
+    onStart({
+      name: cleanName,
+      nim: cleanNim,
+      sessionId: uniqueSessionId,
+      sessionPin: cleanPin,
+      sessionMode: sessionInfo.mode || 'quiz_race',
+      sessionTitle: sessionInfo.title || 'Sesi Kelas',
+      timePerQuestion: sessionInfo.timePerQuestion || sessionInfo.time_per_question || 30,
+      raceQuestions: (sessionInfo.raceQuestions && sessionInfo.raceQuestions.length > 0)
+        ? sessionInfo.raceQuestions
+        : (sessionInfo.race_questions && sessionInfo.race_questions.length > 0)
+        ? sessionInfo.race_questions
+        : null,
+      characterType: isRace ? 'kart' : 'runner',
+      characterColor: 'blue'
+    });
   };
 
   return (
-    <div className="game-card final-card">
+    <div className="game-card final-card" style={{ maxWidth: '520px', margin: '0 auto' }}>
       <div className="final-emoji">🎒</div>
-      <h2 style={{ color: 'var(--purple-dark)', marginTop: 0, fontSize: '1.6em' }}>
-        Sebelum Mulai, Isi Data Dulu ya!
+      <h2 style={{ color: '#c084fc', marginTop: 0, fontSize: '1.6em' }}>
+        Masuk ke Dunia Belajar Anak
       </h2>
-      <p style={{ textAlign: 'left', color: '#475569', lineHeight: 1.6 }}>
-        Isi nama dan NIM kamu agar hasil observasi bermain dan skor pengerjaan tercatat di rekap dosen.
+      <p style={{ textAlign: 'center', color: '#94a3b8', lineHeight: 1.5, margin: '0 0 20px', fontSize: '0.92em' }}>
+        Masukkan nama dan NIM untuk memulai permainan edukatif observasi perkembangan anak!
       </p>
-      <div style={{
-        textAlign: 'left',
-        background: 'var(--blue-light)',
-        border: '1px solid #bfdbfe',
-        borderRadius: 'var(--radius-md)',
-        padding: '12px 16px',
-        fontSize: '0.9em',
-        color: '#1e40af',
-        marginBottom: '20px'
-      }}>
-        💡 <b>Petunjuk:</b> Setiap gembok memiliki petunjuk (hint). Pilihlah jawaban dengan cermat pada percobaan pertama untuk mendapatkan skor maksimal!
-      </div>
 
       <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
-        <div className="form-group">
+        {/* Nama Lengkap */}
+        <div className="form-group" style={{ marginBottom: '14px' }}>
           <label className="form-label" htmlFor="student-name">
             <span style={{ display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px' }}>
               <User size={18} color="var(--purple)" />
@@ -70,7 +107,8 @@ export default function StudentForm({ onStart }) {
           />
         </div>
 
-        <div className="form-group">
+        {/* NIM */}
+        <div className="form-group" style={{ marginBottom: '14px' }}>
           <label className="form-label" htmlFor="student-nim">
             <span style={{ display: 'inline-flex', verticalAlign: 'middle', marginRight: '6px' }}>
               <CreditCard size={18} color="var(--blue)" />
@@ -87,6 +125,30 @@ export default function StudentForm({ onStart }) {
           />
         </div>
 
+        {/* PIN Sesi Kelas Dosen (Wajib) */}
+        <div className="form-group" style={{ marginBottom: '22px' }}>
+          <label className="form-label" htmlFor="student-pin" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Radio size={18} color="var(--green-dark)" />
+              <span>PIN Sesi Kelas Dosen (Multiplayer)</span>
+            </span>
+            <span style={{ fontSize: '0.8em', color: '#f59e0b', fontWeight: 700 }}>
+              * Wajib Diisi (6 Digit)
+            </span>
+          </label>
+          <input
+            id="student-pin"
+            type="text"
+            className="form-input"
+            placeholder="Masukkan 6 Digit PIN (Contoh: 849201)"
+            value={pin}
+            maxLength={6}
+            onChange={(e) => { setPin(e.target.value.replace(/\D/g, '')); setError(''); }}
+            style={{ letterSpacing: pin ? '4px' : 'normal', fontWeight: pin ? 800 : 400, fontSize: '1.1em' }}
+            required
+          />
+        </div>
+
         {error && (
           <div className="feedback-box no" style={{ marginBottom: '16px' }}>
             <AlertCircle size={18} />
@@ -95,9 +157,23 @@ export default function StudentForm({ onStart }) {
         )}
 
         <div className="btnrow" style={{ justifyContent: 'center' }}>
-          <button type="submit" className="main-btn" style={{ maxWidth: '320px' }}>
-            <Sparkles size={20} />
-            Mulai Bermain ✨
+          <button
+            type="submit"
+            className="main-btn"
+            disabled={validatingPin}
+            style={{ width: '100%', maxWidth: '340px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+          >
+            {validatingPin ? (
+              <>
+                <Sparkles size={20} style={{ animation: 'spin 1.5s linear infinite' }} />
+                <span>Memeriksa Sesi Kelas...</span>
+              </>
+            ) : (
+              <>
+                <LogIn size={20} />
+                <span>Gabung ke Sesi Kelas</span>
+              </>
+            )}
           </button>
         </div>
       </form>

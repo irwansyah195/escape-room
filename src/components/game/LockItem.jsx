@@ -27,8 +27,8 @@ export default function LockItem({
   const handleOptionClick = (optObj, index) => {
     if (solved || disabledOptions.has(index)) return;
 
-    // Jika sudah 2x salah (artinya hanya tersisa 1 opsi logis), langsung proses tanpa konfirmasi
-    if (wrongCount >= 2) {
+    // Jika sudah 3x salah (artinya hanya tersisa 1 opsi logis), langsung proses tanpa konfirmasi
+    if (wrongCount >= 3) {
       processChoice(optObj, index);
       return;
     }
@@ -61,11 +61,14 @@ export default function LockItem({
         earned = perLockMax;
         msg = `✅ Benar langsung di percobaan pertama! Skor: ${earned.toFixed(2)} poin.`;
       } else if (wrongCount === 1) {
-        earned = perLockMax / 2;
-        msg = `✅ Benar di percobaan kedua. Skor: ${earned.toFixed(2)} poin (setengah dari nilai maksimal).`;
+        earned = perLockMax * 0.5;
+        msg = `✅ Benar di percobaan kedua. Skor: ${earned.toFixed(2)} poin (50% dari nilai maksimal).`;
+      } else if (wrongCount === 2) {
+        earned = perLockMax * 0.25;
+        msg = `✅ Benar di percobaan ketiga. Skor: ${earned.toFixed(2)} poin (25% dari nilai maksimal).`;
       } else {
         earned = 0;
-        msg = `✅ Terbuka di kesempatan terakhir. Skor: 0 poin.`;
+        msg = `✅ Terbuka di percobaan ke-4 atau lebih. Skor: 0 poin.`;
       }
 
       setFeedback({ type: 'ok', text: msg });
@@ -86,10 +89,12 @@ export default function LockItem({
       setSelectedOptIndex(null);
 
       let msg = '';
-      if (nextWrong >= 2) {
-        msg = '❌ Belum tepat. Ini percobaan terakhirmu — opsi yang tersisa pasti jawabannya, namun skor soal ini akan 0 poin.';
+      if (nextWrong >= 3) {
+        msg = '❌ Belum tepat. Ini percobaan ke-4 — opsi yang tersisa pasti jawabannya, namun skor soal ini akan 0 poin.';
+      } else if (nextWrong === 2) {
+        msg = '❌ Belum tepat. Percobaan ke-3 masih bernilai 25% skor. Periksa kembali narasi skenario dengan teliti!';
       } else {
-        msg = '❌ Belum tepat, coba periksa kembali bukti perilaku pada narasi skenario. Percobaan berikutnya bernilai setengah skor.';
+        msg = '❌ Belum tepat, coba periksa kembali bukti perilaku pada narasi skenario. Percobaan ke-2 bernilai 50% skor.';
       }
 
       setFeedback({ type: 'no', text: msg });

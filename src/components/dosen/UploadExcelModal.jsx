@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Upload,
   FileSpreadsheet,
@@ -47,8 +48,8 @@ export default function UploadExcelModal({ isOpen, onClose, onApplyRooms }) {
     }
   };
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
+  return createPortal(
+    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 9999 }}>
       <div
         className="modal-card"
         style={{ maxWidth: '780px', width: '95%' }}
@@ -70,10 +71,10 @@ export default function UploadExcelModal({ isOpen, onClose, onApplyRooms }) {
               <FileSpreadsheet size={22} />
             </div>
             <div>
-              <h3 style={{ margin: 0, color: 'var(--purple-dark)', fontSize: '1.25em' }}>
+              <h3 style={{ margin: 0, color: '#c084fc', fontSize: '1.25em' }}>
                 Upload Soal & Kunci Jawaban dari Excel
               </h3>
-              <p style={{ margin: 0, fontSize: '0.84em', color: 'var(--gray)' }}>
+              <p style={{ margin: 0, fontSize: '0.84em', color: '#94a3b8' }}>
                 Unggah file spreadsheet (.xlsx) untuk memperbarui ruangan & soal secara massal
               </p>
             </div>
@@ -82,7 +83,7 @@ export default function UploadExcelModal({ isOpen, onClose, onApplyRooms }) {
           <button
             type="button"
             onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray)', padding: '4px' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '4px' }}
           >
             <X size={22} />
           </button>
@@ -91,18 +92,18 @@ export default function UploadExcelModal({ isOpen, onClose, onApplyRooms }) {
         {/* Area Pilih File */}
         {!parseResult?.success && (
           <div style={{
-            border: '2px dashed #cbd5e1',
+            border: '2px dashed rgba(148, 163, 184, 0.35)',
             borderRadius: 'var(--radius-md)',
             padding: '30px 20px',
             textAlign: 'center',
-            background: '#f8fafc',
+            background: 'rgba(30, 41, 59, 0.6)',
             cursor: 'pointer',
             marginBottom: '16px',
             transition: 'border-color 0.2s'
           }}
           onClick={() => fileInputRef.current?.click()}
-          onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--blue)'}
-          onMouseLeave={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+          onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--purple)'}
+          onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(148, 163, 184, 0.35)'}
           >
             <input
               ref={fileInputRef}
@@ -112,11 +113,11 @@ export default function UploadExcelModal({ isOpen, onClose, onApplyRooms }) {
               onChange={handleFileChange}
             />
 
-            <Upload size={36} color="var(--blue)" style={{ margin: '0 auto 10px' }} />
-            <div style={{ fontWeight: 700, fontSize: '1.05em', color: 'var(--dark)' }}>
+            <Upload size={36} color="var(--purple)" style={{ margin: '0 auto 10px' }} />
+            <div style={{ fontWeight: 700, fontSize: '1.05em', color: '#f8fafc' }}>
               {file ? file.name : "Klik untuk Memilih File Excel (.xlsx)"}
             </div>
-            <p style={{ margin: '6px 0 0', fontSize: '0.86em', color: 'var(--gray)' }}>
+            <p style={{ margin: '6px 0 0', fontSize: '0.86em', color: '#94a3b8' }}>
               Pastikan format kolom mengikuti template resmi yang telah diunduh
             </p>
           </div>
@@ -267,6 +268,7 @@ export default function UploadExcelModal({ isOpen, onClose, onApplyRooms }) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

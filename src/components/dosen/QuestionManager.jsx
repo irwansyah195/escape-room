@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Plus,
   Edit2,
@@ -21,6 +22,7 @@ import { defaultRooms } from '../../data/defaultRooms';
 import { EmojiPickerGrid, ROOM_ICONS, KEY_REWARDS } from './EmojiPicker';
 import { generateQuestionTemplate, exportActiveRoomsToExcel } from '../../utils/excelQuestions';
 import UploadExcelModal from './UploadExcelModal';
+import AiGeneratorModal from './AiGeneratorModal';
 
 export default function QuestionManager({ rooms, onUpdateRooms }) {
   // State untuk modal edit ruangan
@@ -30,6 +32,7 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
   const [isSaving, setIsSaving] = useState(false);
   const [alertMsg, setAlertMsg] = useState(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   const notify = (type, text) => {
     setAlertMsg({ type, text });
@@ -42,6 +45,14 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
     onUpdateRooms(newRooms);
     setIsSaving(false);
     notify('success', `Berhasil menerapkan ${newRooms.length} ruangan dan soal baru dari Excel!`);
+  };
+
+  const handleApplyFromAi = async (newRooms) => {
+    setIsSaving(true);
+    await saveRoomsToDb(newRooms);
+    onUpdateRooms(newRooms);
+    setIsSaving(false);
+    notify('success', `Berhasil menerapkan ${newRooms.length} ruangan dan soal baru dari AI!`);
   };
 
   // -------------------------------------------------------------
@@ -258,6 +269,24 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
           <button
             type="button"
             className="btn-confirm-yes"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'linear-gradient(135deg, #9333ea 0%, #ec4899 100%)',
+              boxShadow: '0 4px 12px rgba(147, 51, 234, 0.35)',
+              color: 'white'
+            }}
+            onClick={() => setIsAiModalOpen(true)}
+            title="Generate soal observasi otomatis berbasis AI sesuai topik & tingkat kesulitan"
+          >
+            <Sparkles size={16} />
+            <span>Generate Soal AI</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn-confirm-yes"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--green-dark)' }}
             onClick={() => setIsUploadModalOpen(true)}
             title="Unggah soal baru dari file Excel"
@@ -307,32 +336,125 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
         </div>
       )}
 
-      {/* List Ruangan */}
+      {/* List Ruangan / Empty State */}
       {rooms.length === 0 ? (
         <div style={{
           textAlign: 'center',
-          padding: '40px 20px',
-          background: 'var(--gray-light)',
-          borderRadius: 'var(--radius-md)',
-          color: 'var(--gray)'
+          padding: '48px 24px',
+          background: 'rgba(30, 41, 59, 0.55)',
+          border: '2px dashed rgba(168, 85, 247, 0.35)',
+          borderRadius: '20px',
+          color: '#cbd5e1',
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.25)'
         }}>
-          <Lock size={36} style={{ opacity: 0.5, marginBottom: '8px' }} />
-          <p style={{ margin: '0 0 12px', fontWeight: 600 }}>Belum ada ruangan soal yang dibuat.</p>
-          <button type="button" className="btn-confirm-yes" onClick={handleOpenAddRoom}>
-            Buat Ruangan Pertama
-          </button>
+          <div style={{
+            width: '72px',
+            height: '72px',
+            margin: '0 auto 16px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%)',
+            border: '1px solid rgba(168, 85, 247, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 0 24px rgba(168, 85, 247, 0.3)'
+          }}>
+            <Lock size={36} color="#c084fc" />
+          </div>
+
+          <h3 style={{ margin: '0 0 8px', color: '#f8fafc', fontSize: '1.35em', fontWeight: 800 }}>
+            Ruangan Escape Room Masih Kosong
+          </h3>
+          <p style={{ margin: '0 auto 24px', maxWidth: '540px', color: '#94a3b8', fontSize: '0.94em', lineHeight: 1.6 }}>
+            Belum ada skenario ruangan atau gembok soal Escape Room yang tersimpan. Anda dapat membuat soal otomatis dengan Gemini AI, mengimpor dari file Excel, menambahkan manual, atau memulihkan ruangan bawaan.
+          </p>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setIsAiModalOpen(true)}
+              style={{
+                background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '12px 22px',
+                color: 'white',
+                fontWeight: 800,
+                fontSize: '0.92em',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 18px rgba(168, 85, 247, 0.45)'
+              }}
+            >
+              <Sparkles size={18} />
+              <span>✨ Buat Ruangan dengan AI</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsUploadModalOpen(true)}
+              className="btn-confirm-no"
+              style={{
+                borderRadius: '12px',
+                padding: '12px 20px',
+                fontSize: '0.92em',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <Upload size={18} />
+              <span>📥 Impor dari Excel</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleOpenAddRoom}
+              className="btn-confirm-no"
+              style={{
+                borderRadius: '12px',
+                padding: '12px 20px',
+                fontSize: '0.92em',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <Plus size={18} />
+              <span>➕ Tambah Ruangan Manual</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleResetToDefault}
+              className="btn-confirm-no"
+              style={{
+                borderRadius: '12px',
+                padding: '12px 20px',
+                fontSize: '0.92em',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <RotateCcw size={18} />
+              <span>🔄 Muat Ruangan Bawaan</span>
+            </button>
+          </div>
         </div>
       ) : (
         rooms.map((room, rIdx) => (
           <div
             key={room.id || rIdx}
             style={{
-              background: 'white',
-              border: '2px solid #e2e8f0',
+              background: 'rgba(30, 41, 59, 0.75)',
+              border: '1px solid rgba(148, 163, 184, 0.25)',
               borderRadius: 'var(--radius-md)',
               padding: '18px',
               marginBottom: '20px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+              boxShadow: '0 4px 16px rgba(0,0,0,0.2)'
             }}
           >
             {/* Header Ruangan */}
@@ -342,20 +464,21 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
               alignItems: 'flex-start',
               flexWrap: 'wrap',
               gap: '10px',
-              borderBottom: '1px solid #f1f5f9',
+              borderBottom: '1px solid rgba(148, 163, 184, 0.2)',
               paddingBottom: '14px',
               marginBottom: '14px'
             }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '1.4em' }}>{room.icon || '🧱'}</span>
-                  <span style={{ fontWeight: 800, fontSize: '1.18em', color: 'var(--purple-dark)' }}>
+                  <span style={{ fontWeight: 800, fontSize: '1.18em', color: '#c084fc' }}>
                     Ruang {rIdx + 1}: {room.title}
                   </span>
                   <span style={{
                     fontSize: '0.82em',
-                    background: 'var(--yellow-light)',
-                    color: 'var(--yellow-dark)',
+                    background: 'rgba(251, 191, 36, 0.2)',
+                    color: '#fde047',
+                    border: '1px solid rgba(251, 191, 36, 0.4)',
                     padding: '2px 8px',
                     borderRadius: 'var(--radius-full)',
                     fontWeight: 700
@@ -377,7 +500,7 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
                 <button
                   type="button"
                   className="btn-confirm-no"
-                  style={{ padding: '6px 12px', fontSize: '0.85em', color: '#dc2626', borderColor: '#fca5a5', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  style={{ padding: '6px 12px', fontSize: '0.85em', color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.4)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                   onClick={() => handleDeleteRoom(rIdx)}
                 >
                   <Trash2 size={14} /> Hapus
@@ -387,22 +510,24 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
 
             {/* Narasi Cerita Skenario */}
             <div style={{
-              background: '#f8fafc',
-              borderLeft: '4px solid var(--yellow)',
+              background: 'rgba(15, 23, 42, 0.65)',
+              borderLeft: '4px solid var(--purple)',
               padding: '12px 14px',
               borderRadius: 'var(--radius-sm)',
               fontSize: '0.9em',
               lineHeight: 1.55,
-              color: '#334155',
-              marginBottom: '16px'
+              color: '#e2e8f0',
+              marginBottom: '16px',
+              border: '1px solid rgba(148, 163, 184, 0.15)',
+              borderLeftWidth: '4px'
             }}>
-              <b>📖 Narasi Skenario:</b> {room.text}
+              <b style={{ color: '#c084fc' }}>📖 Narasi Skenario:</b> {room.text}
             </div>
 
             {/* Daftar Gembok dalam Ruangan */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <div style={{ fontWeight: 700, fontSize: '0.95em', color: 'var(--dark)' }}>
-                Daftar Gembok ({ (room.locks || []).length } soal)
+              <div style={{ fontWeight: 700, fontSize: '0.95em', color: '#f8fafc' }}>
+                Daftar Gembok ({(room.locks || []).length} soal)
               </div>
               <button
                 type="button"
@@ -415,7 +540,7 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
             </div>
 
             {(room.locks || []).length === 0 ? (
-              <p style={{ fontSize: '0.88em', color: 'var(--gray)', fontStyle: 'italic', margin: '8px 0' }}>
+              <p style={{ fontSize: '0.88em', color: '#94a3b8', fontStyle: 'italic', margin: '8px 0' }}>
                 Belum ada gembok/soal di ruangan ini. Klik tombol "Tambah Gembok" di atas.
               </p>
             ) : (
@@ -424,14 +549,14 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
                   <div
                     key={lock.id || lIdx}
                     style={{
-                      background: 'var(--cream)',
-                      border: '1px solid #e2e8f0',
+                      background: 'rgba(15, 23, 42, 0.6)',
+                      border: '1px solid rgba(148, 163, 184, 0.2)',
                       borderRadius: 'var(--radius-sm)',
                       padding: '12px 14px'
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.94em', color: 'var(--dark)' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.94em', color: '#f8fafc' }}>
                         🔒 Gembok {lIdx + 1}: {lock.q}
                       </div>
                       <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
@@ -446,7 +571,7 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
                         <button
                           type="button"
                           className="btn-confirm-no"
-                          style={{ padding: '4px 8px', fontSize: '0.8em', color: '#dc2626', borderColor: '#fca5a5' }}
+                          style={{ padding: '4px 8px', fontSize: '0.8em', color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.4)' }}
                           onClick={() => handleDeleteLock(rIdx, lIdx)}
                         >
                           <Trash2 size={13} />
@@ -500,8 +625,8 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
       {/* ============================================================= */}
       {/* MODAL EDIT / TAMBAH RUANGAN */}
       {/* ============================================================= */}
-      {editingRoom && (
-        <div className="modal-overlay" onClick={() => setEditingRoom(null)}>
+      {editingRoom && createPortal(
+        <div className="modal-overlay" onClick={() => setEditingRoom(null)} style={{ zIndex: 9999 }}>
           <div className="modal-card" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, color: 'var(--purple-dark)' }}>
@@ -611,14 +736,15 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ============================================================= */}
       {/* MODAL EDIT / TAMBAH GEMBOK / SOAL */}
       {/* ============================================================= */}
-      {editingLock && (
-        <div className="modal-overlay" onClick={() => setEditingLock(null)}>
+      {editingLock && createPortal(
+        <div className="modal-overlay" onClick={() => setEditingLock(null)} style={{ zIndex: 9999 }}>
           <div className="modal-card" style={{ maxWidth: '640px' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ margin: 0, color: 'var(--purple-dark)' }}>
@@ -760,7 +886,8 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal Upload & Pratinjau Soal Excel */}
@@ -768,6 +895,13 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         onApplyRooms={handleApplyFromExcel}
+      />
+
+      {/* Modal AI Generator Soal */}
+      <AiGeneratorModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        onApplyRooms={handleApplyFromAi}
       />
     </div>
   );
