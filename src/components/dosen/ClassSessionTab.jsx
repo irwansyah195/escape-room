@@ -20,8 +20,10 @@ import {
   Maximize2,
   Minimize2,
   X,
-  UserMinus
+  UserMinus,
+  QrCode
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import {
   generateSessionPin,
   createClassSession,
@@ -49,6 +51,17 @@ export default function ClassSessionTab({ rooms }) {
   const [showPodium, setShowPodium] = useState(false);
   const [timePerQuestion, setTimePerQuestion] = useState(30);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyLink = () => {
+    if (!activeSession?.pin) return;
+    const url = `https://eduplay-escape.netlify.app/?pin=${activeSession.pin}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    });
+  };
 
   // Pantau status fullscreen browser
   useEffect(() => {
@@ -563,6 +576,28 @@ export default function ClassSessionTab({ rooms }) {
 
                 <button
                   type="button"
+                  onClick={() => setShowQrModal(true)}
+                  style={{
+                    background: 'rgba(255,255,255,0.25)',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    color: 'white',
+                    borderRadius: '12px',
+                    padding: '12px 18px',
+                    fontWeight: 700,
+                    fontSize: '0.9em',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                  title="Tampilkan QR Code untuk dipindai mahasiswa"
+                >
+                  <QrCode size={18} />
+                  <span>Scan QR</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={handleEndSession}
                   style={{
                     background: 'rgba(239, 68, 68, 0.85)',
@@ -910,17 +945,44 @@ export default function ClassSessionTab({ rooms }) {
               {playersList.length === 0 ? (
                 <div style={{
                   textAlign: 'center',
-                  padding: '40px 20px',
+                  padding: '36px 20px',
                   background: 'rgba(15, 23, 42, 0.6)',
                   border: '1px dashed rgba(148, 163, 184, 0.25)',
-                  borderRadius: '12px',
-                  color: '#94a3b8'
+                  borderRadius: '16px',
+                  color: '#94a3b8',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '14px'
                 }}>
-                  <Sparkles size={32} color="var(--purple)" style={{ marginBottom: '8px', opacity: 0.8 }} />
-                  <p style={{ margin: '0 0 4px', fontWeight: 700, color: '#f8fafc' }}>Menunggu Mahasiswa Masuk ke Ruang Tunggu...</p>
-                  <span style={{ fontSize: '0.85em' }}>
-                    Minta mahasiswa memasukkan kode PIN <b>{activeSession.pin}</b> di halaman depan permainan.
-                  </span>
+                  <div
+                    onClick={() => setShowQrModal(true)}
+                    style={{
+                      background: 'white',
+                      padding: '12px',
+                      borderRadius: '16px',
+                      cursor: 'pointer',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                      transition: 'transform 0.2s',
+                      display: 'inline-block'
+                    }}
+                    title="Klik untuk memperbesar QR Code"
+                  >
+                    <QRCodeSVG
+                      value={`https://eduplay-escape.netlify.app/?pin=${activeSession.pin}`}
+                      size={150}
+                      level="H"
+                    />
+                  </div>
+
+                  <div>
+                    <p style={{ margin: '0 0 4px', fontWeight: 800, color: '#f8fafc', fontSize: '1.05em' }}>
+                      Scan QR Code di atas atau masukkan PIN: <span style={{ color: '#fbbf24', letterSpacing: '2px' }}>{activeSession.pin}</span>
+                    </p>
+                    <span style={{ fontSize: '0.86em', color: '#94a3b8' }}>
+                      Mahasiswa scan langsung dengan smartphone untuk otomatis terhubung dan mengisi Nama & NPM
+                    </span>
+                  </div>
                 </div>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '12px' }}>
@@ -988,6 +1050,112 @@ export default function ClassSessionTab({ rooms }) {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Modal Tampilan QR Code Sesi Kelas */}
+      {showQrModal && activeSession?.pin && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowQrModal(false)}
+          style={{ zIndex: 9999 }}
+        >
+          <div
+            className="modal-card"
+            style={{
+              maxWidth: '460px',
+              textAlign: 'center',
+              padding: '28px 24px',
+              background: '#0f172a',
+              border: '2px solid rgba(168, 85, 247, 0.4)',
+              borderRadius: '24px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <QrCode size={22} color="#c084fc" />
+                <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '1.2em', fontWeight: 800 }}>
+                  Scan QR Masuk Sesi Kelas
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQrModal(false)}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px' }}
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <p style={{ color: '#94a3b8', fontSize: '0.9em', margin: '0 0 20px', lineHeight: 1.5 }}>
+              Arahkan kamera smartphone ke QR Code ini untuk otomatis mengisi PIN sesi dan langsung memasukkan Nama & NPM/NIM.
+            </p>
+
+            {/* QR Code Container */}
+            <div style={{
+              background: 'white',
+              padding: '16px',
+              borderRadius: '20px',
+              display: 'inline-block',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+              marginBottom: '20px'
+            }}>
+              <QRCodeSVG
+                value={`https://eduplay-escape.netlify.app/?pin=${activeSession.pin}`}
+                size={240}
+                level="H"
+                includeMargin={false}
+              />
+            </div>
+
+            {/* PIN Badge & Tombol Salin Link */}
+            <div style={{
+              background: 'rgba(30, 41, 59, 0.8)',
+              border: '1px solid rgba(148, 163, 184, 0.25)',
+              borderRadius: '14px',
+              padding: '12px 16px',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px'
+            }}>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: '0.75em', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  Kode PIN Sesi
+                </div>
+                <div style={{ fontSize: '1.4em', fontWeight: 900, color: '#fbbf24', letterSpacing: '3px' }}>
+                  {activeSession.pin}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                style={{
+                  background: copiedLink ? 'rgba(34, 197, 94, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+                  border: `1px solid ${copiedLink ? '#22c55e' : '#a855f7'}`,
+                  color: copiedLink ? '#4ade80' : '#c084fc',
+                  padding: '8px 14px',
+                  borderRadius: '10px',
+                  fontSize: '0.85em',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                {copiedLink ? <CheckCircle2 size={16} /> : <Copy size={16} />}
+                <span>{copiedLink ? 'Link Tersalin!' : 'Salin Link URL'}</span>
+              </button>
+            </div>
+
+            <div style={{ fontSize: '0.78em', color: '#64748b', wordBreak: 'break-all' }}>
+              https://eduplay-escape.netlify.app/?pin={activeSession.pin}
+            </div>
+          </div>
         </div>
       )}
     </div>
