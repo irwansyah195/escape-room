@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CarIcon from '../common/CarIcon';
 import {
   Radio,
   Gamepad2,
@@ -900,7 +901,7 @@ export default function ClassSessionTab({ rooms }) {
                           </div>
 
                           <div style={{ fontSize: '1.6em' }}>
-                            {player.characterType === 'kart' ? '🏎️' : '🏃'}
+                            <CarIcon characterType={player.characterType} characterColor={player.characterColor} size={26} />
                           </div>
 
                           <div>
@@ -1048,7 +1049,7 @@ export default function ClassSessionTab({ rooms }) {
                         justifyContent: 'center',
                         fontSize: '1.4em'
                       }}>
-                        {player.characterType === 'kart' ? '🏎️' : '🏃'}
+                        <CarIcon characterType={player.characterType} characterColor={player.characterColor} size={22} />
                       </div>
 
                       <div style={{ flex: 1, minWidth: 0 }}>

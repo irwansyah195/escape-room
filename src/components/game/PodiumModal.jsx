@@ -1,4 +1,5 @@
 import React from 'react';
+import CarIcon from '../common/CarIcon';
 import { Trophy, Medal, Award, Sparkles, X, CheckCircle2, RotateCcw } from 'lucide-react';
 
 export default function PodiumModal({ players, onClose, isDosen = false }) {
@@ -99,7 +100,7 @@ export default function PodiumModal({ players, onClose, isDosen = false }) {
             {secondPlace && (
               <>
                 <div style={{ fontSize: '2em', marginBottom: '4px' }}>
-                  {secondPlace.characterType === 'kart' ? '🏎️' : '🏃'}
+                  <CarIcon characterType={secondPlace.characterType} characterColor={secondPlace.characterColor} size={32} />
                 </div>
                 <div style={{ fontWeight: 800, fontSize: '0.9em', color: '#f1f5f9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '160px' }}>
                   {secondPlace.name}
@@ -132,7 +133,7 @@ export default function PodiumModal({ players, onClose, isDosen = false }) {
                 <div style={{ position: 'relative', marginBottom: '4px' }}>
                   <Trophy size={36} color="#facc15" style={{ filter: 'drop-shadow(0 0 12px rgba(250, 204, 21, 0.8))' }} />
                   <div style={{ fontSize: '2.4em', marginTop: '-10px' }}>
-                    {firstPlace.characterType === 'kart' ? '🏎️' : '🏃'}
+                    <CarIcon characterType={firstPlace.characterType} characterColor={firstPlace.characterColor} size={32} />
                   </div>
                 </div>
                 <div style={{ fontWeight: 900, fontSize: '1.05em', color: '#fef08a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '190px' }}>
@@ -165,7 +166,7 @@ export default function PodiumModal({ players, onClose, isDosen = false }) {
             {thirdPlace && (
               <>
                 <div style={{ fontSize: '2em', marginBottom: '4px' }}>
-                  {thirdPlace.characterType === 'kart' ? '🏎️' : '🏃'}
+                  <CarIcon characterType={thirdPlace.characterType} characterColor={thirdPlace.characterColor} size={32} />
                 </div>
                 <div style={{ fontWeight: 800, fontSize: '0.9em', color: '#f1f5f9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '160px' }}>
                   {thirdPlace.name}

@@ -93,6 +93,42 @@ export function generateAllGameTextures(scene) {
     }
   });
 
+  // 2b. Mobil Balap Sprint (menghadap KANAN secara native, tanpa rotasi) - dipakai lintasan spektator & peserta
+  Object.entries(kartColors).forEach(([colorName, mainColor]) => {
+    const key = `racecar_${colorName}`;
+    if (!scene.textures.exists(key)) {
+      const g = scene.make.graphics({ x: 0, y: 0, add: false });
+      // Roda (atas & bawah)
+      g.fillStyle(0x1e293b, 1);
+      g.fillRoundedRect(8, 1, 12, 6, 2);
+      g.fillRoundedRect(30, 1, 12, 6, 2);
+      g.fillRoundedRect(8, 29, 12, 6, 2);
+      g.fillRoundedRect(30, 29, 12, 6, 2);
+      // Sayap belakang (kiri)
+      g.fillStyle(0x0f172a, 1);
+      g.fillRect(1, 6, 5, 24);
+      // Bodi utama, hidung meruncing ke kanan
+      g.fillStyle(mainColor, 1);
+      g.fillRoundedRect(4, 8, 40, 20, 6);
+      g.fillTriangle(40, 8, 40, 28, 54, 18);
+      // Garis balap putih
+      g.fillStyle(0xffffff, 0.9);
+      g.fillRect(8, 16, 38, 4);
+      // Kokpit
+      g.fillStyle(0x0f172a, 1);
+      g.fillRoundedRect(20, 11, 14, 14, 4);
+      g.fillStyle(0x38bdf8, 1);
+      g.fillRect(28, 13, 4, 10);
+      // Lampu depan
+      g.fillStyle(0xfef08a, 1);
+      g.fillCircle(50, 15, 2);
+      g.fillCircle(50, 21, 2);
+
+      g.generateTexture(key, 56, 36);
+      g.destroy();
+    }
+  });
+
   // 3. Stasiun Gembok / Meja Observasi (Escape Room)
   if (!scene.textures.exists('station_locked')) {
     const g = scene.make.graphics({ x: 0, y: 0, add: false });

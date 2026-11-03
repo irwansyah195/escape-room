@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CarIcon from '../common/CarIcon';
 import { Users, Sparkles, Flame, Gamepad2, LogOut, Radio, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import {
   subscribeToSessionPlayers,
@@ -277,7 +278,9 @@ export default function WaitingLobby({ student, onUpdateStudent, onCountdownComp
             boxShadow: `0 0 30px ${currentOption.border}88`,
             transition: 'all 0.25s ease'
           }}>
-            {currentOption.emoji}
+            {currentOption.type === 'kart'
+              ? <CarIcon characterType="kart" characterColor={currentOption.color} size={48} />
+              : currentOption.emoji}
           </div>
           <div style={{
             display: 'inline-block',
@@ -352,7 +355,7 @@ export default function WaitingLobby({ student, onUpdateStudent, onCountdownComp
                     position: 'relative'
                   }}
                 >
-                  <div style={{ fontSize: '2em', marginBottom: '4px' }}>{opt.emoji}</div>
+                  <div style={{ fontSize: '2em', marginBottom: '4px' }}>{opt.type === 'kart' ? <div style={{ display: 'flex', justifyContent: 'center' }}><CarIcon characterType="kart" characterColor={opt.color} size={32} /></div> : opt.emoji}</div>
                   <div style={{ fontWeight: 800, fontSize: '0.85em', color: isSelected ? opt.border : '#cbd5e1' }}>
                     {opt.label}
                   </div>
@@ -430,7 +433,9 @@ export default function WaitingLobby({ student, onUpdateStudent, onCountdownComp
                     fontSize: '1.4em',
                     flexShrink: 0
                   }}>
-                    {pOpt.emoji}
+                    {pOpt.type === 'kart'
+                      ? <CarIcon characterType="kart" characterColor={pOpt.color} size={22} />
+                      : pOpt.emoji}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{

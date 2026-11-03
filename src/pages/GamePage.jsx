@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import CarIcon from '../components/common/CarIcon';
 import { Link } from 'react-router-dom';
 import SkyBackground from '../components/common/SkyBackground';
 import Header from '../components/common/Header';
@@ -595,7 +596,7 @@ export default function GamePage({ rooms, loadingRooms }) {
                 justifyContent: 'center',
                 fontSize: '1.3em'
               }}>
-                {student.characterType === 'kart' ? '🏎️' : '🏃'}
+                <CarIcon characterType={student.characterType} characterColor={student.characterColor} size={32} />
               </div>
               <div>
                 <div style={{ fontWeight: 800, fontSize: '0.98em', color: '#c084fc' }}>

@@ -138,9 +138,9 @@ export default class SprintRaceScene extends Phaser.Scene {
         const isKart = player.characterType === 'kart';
         const charKey = `${player.characterType || 'kart'}_${player.characterColor || 'blue'}`;
 
-        const sprite = this.add.sprite(0, 0, charKey);
-        sprite.setScale(isKart ? 1.05 : 0.95);
-        if (isKart) sprite.setAngle(90); // Hadap ke kanan menuju garis finish
+        // Tekstur racecar_* sudah menghadap kanan (arah maju) sehingga tidak perlu rotasi
+        const sprite = this.add.sprite(0, 0, isKart ? `racecar_${player.characterColor || 'blue'}` : charKey);
+        sprite.setScale(isKart ? 1 : 0.95);
 
         // Label Nama Pemain
         const isMe = this.student && (uid === this.student.sessionId || player.nim === this.student.nim);
@@ -170,12 +170,23 @@ export default class SprintRaceScene extends Phaser.Scene {
           sprite,
           nameLabel,
           progressBadge,
+          textureKey: isKart ? `racecar_${player.characterColor || 'blue'}` : charKey,
           targetX,
           currentX: this.startX,
           lastProgressIdx: player.progressIdx || 0
         };
 
         this.racerEntities.set(uid, entity);
+      }
+
+      // Sinkronkan tampilan mobil jika pemain mengganti pilihan warna/kendaraan
+      const wantKart = (player.characterType || 'kart') === 'kart';
+      const wantKey = wantKart
+        ? `racecar_${player.characterColor || 'blue'}`
+        : `${player.characterType || 'runner'}_${player.characterColor || 'blue'}`;
+      if (entity.sprite && entity.textureKey !== wantKey && this.textures.exists(wantKey)) {
+        entity.sprite.setTexture(wantKey);
+        entity.textureKey = wantKey;
       }
 
       // Update posisi target & teks progres
