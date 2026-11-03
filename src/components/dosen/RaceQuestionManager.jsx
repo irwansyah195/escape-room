@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Flame,
@@ -10,9 +10,12 @@ import {
   RotateCcw,
   BookOpen,
   HelpCircle,
-  X
+  X,
+  FileSpreadsheet
 } from 'lucide-react';
 import { getStoredRaceQuestions, saveStoredRaceQuestions, defaultRaceQuestions } from '../../data/defaultRaceQuestions';
+import { getRaceQuestionsFromDb } from '../../supabase/db';
+import { exportRaceQuestionsToExcel } from '../../utils/excelQuestions';
 import AiGeneratorModal from './AiGeneratorModal';
 import Swal from '../../utils/swal';
 
@@ -21,6 +24,18 @@ export default function RaceQuestionManager({ onRaceQuestionsUpdated }) {
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null); // null | question object (new or edit)
   const [isNewQuestion, setIsNewQuestion] = useState(false);
+
+  // Sinkronkan bank soal balap dari database Supabase saat halaman dibuka
+  useEffect(() => {
+    let mounted = true;
+    getRaceQuestionsFromDb().then((dbQuestions) => {
+      if (mounted && Array.isArray(dbQuestions) && dbQuestions.length > 0) {
+        setQuestions(dbQuestions);
+        if (onRaceQuestionsUpdated) onRaceQuestionsUpdated(dbQuestions);
+      }
+    }).catch(() => {});
+    return () => { mounted = false; };
+  }, []);
 
   // Form State untuk Tambah/Edit Soal
   const [formStory, setFormStory] = useState('');
@@ -318,6 +333,26 @@ export default function RaceQuestionManager({ onRaceQuestionsUpdated }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => exportRaceQuestionsToExcel(questions)}
+            className="secondary-btn"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.85em',
+              borderRadius: '10px',
+              color: '#4ade80',
+              borderColor: 'rgba(34, 197, 94, 0.4)',
+              background: 'rgba(34, 197, 94, 0.12)'
+            }}
+            title="Unduh seluruh soal balap yang telah di-generate / aktif ke file Excel (.xlsx)"
+          >
+            <FileSpreadsheet size={16} color="#4ade80" />
+            <span>Export Excel (.xlsx)</span>
+          </button>
+
           <button
             type="button"
             onClick={handleResetToDefault}

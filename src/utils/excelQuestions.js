@@ -266,7 +266,7 @@ export async function generateQuestionTemplate() {
 /**
  * Mengekspor seluruh ruangan & soal aktif yang ada di aplikasi ke Excel lengkap dengan dropdown
  */
-export async function exportActiveRoomsToExcel(rooms) {
+export async function exportActiveRoomsToExcel(rooms, filename = "backup_soal_escape_room_aktif.xlsx") {
   if (!rooms || rooms.length === 0) {
     Swal.fire({
       icon: 'info',
@@ -361,7 +361,80 @@ export async function exportActiveRoomsToExcel(rooms) {
     };
   }
 
-  await downloadExcelWorkbook(wb, "backup_soal_escape_room_aktif.xlsx");
+  await downloadExcelWorkbook(wb, filename);
+}
+
+/**
+ * Mengekspor seluruh butir soal Game Balap (Quiz Race) ke file Excel (.xlsx) lengkap dengan dropdown Kunci Jawaban
+ */
+export async function exportRaceQuestionsToExcel(questions, filename = "soal_balap_quiz_race.xlsx") {
+  if (!questions || questions.length === 0) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Data Kosong',
+      text: 'Tidak ada butir soal balapan untuk diekspor.'
+    });
+    return;
+  }
+
+  const wb = new ExcelJS.Workbook();
+  const wsMain = wb.addWorksheet('Soal Balap (Quiz Race)');
+  const wsRef = wb.addWorksheet('Pilihan Dropdown');
+
+  const answerList = ['A', 'B', 'C', 'D'];
+  answerList.forEach((val, idx) => { wsRef.getCell(`A${idx + 1}`).value = val; });
+  wsRef.state = 'veryHidden';
+
+  wsMain.columns = [
+    { header: 'No', key: 'no', width: 8 },
+    { header: 'Konteks / Cerita Singkat', key: 'story', width: 45 },
+    { header: 'Pertanyaan', key: 'question', width: 50 },
+    { header: 'Pilihan A', key: 'a', width: 35 },
+    { header: 'Pilihan B', key: 'b', width: 35 },
+    { header: 'Pilihan C', key: 'c', width: 35 },
+    { header: 'Pilihan D', key: 'd', width: 35 },
+    { header: 'Kunci Jawaban', key: 'correct', width: 16 },
+    { header: 'Penjelasan / Pembahasan', key: 'explanation', width: 45 }
+  ];
+
+  const headerRow = wsMain.getRow(1);
+  headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  headerRow.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFD97706' } // Amber / Oranye Balap
+  };
+  headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+  headerRow.height = 28;
+
+  questions.forEach((q, idx) => {
+    const opts = q.options || [];
+    const correctIdx = typeof q.correctOption === 'number' ? q.correctOption : (typeof q.correct === 'number' ? q.correct : 0);
+    const correctLetter = String.fromCharCode(65 + Math.max(0, Math.min(3, correctIdx)));
+
+    wsMain.addRow({
+      no: idx + 1,
+      story: q.story || "",
+      question: q.question || q.q || "",
+      a: opts[0] || "",
+      b: opts[1] || "",
+      c: opts[2] || "",
+      d: opts[3] || "",
+      correct: correctLetter,
+      explanation: q.explanation || q.hint || ""
+    });
+  });
+
+  const totalRows = Math.max(wsMain.rowCount + 50, 100);
+  for (let r = 2; r <= totalRows; r++) {
+    wsMain.getCell(`H${r}`).dataValidation = {
+      type: 'list',
+      allowBlank: true,
+      formulae: [`'Pilihan Dropdown'!$A$1:$A$${answerList.length}`]
+    };
+  }
+
+  await downloadExcelWorkbook(wb, filename);
 }
 
 /**

@@ -27,18 +27,7 @@ export async function getRoomsFromDb() {
         return data.list;
       }
 
-      // Jika di tabel Supabase masih kosong, coba inisialisasi dengan data default/cache
-      const localCached = localStorage.getItem(LOCAL_STORAGE_ROOMS_KEY);
-      const initialRooms = localCached ? JSON.parse(localCached) : defaultRooms;
-
-      await supabase.from('rooms_content').upsert({
-        key: 'default',
-        list: initialRooms,
-        updated_at: new Date().toISOString()
-      });
-
-      localStorage.setItem(LOCAL_STORAGE_ROOMS_KEY, JSON.stringify(initialRooms));
-      return initialRooms;
+      // Jangan pernah otomatis menimpa (upsert) defaultRooms ke database saat pembacaan!
     } catch (e) {
       console.warn("Gagal membaca ruangan dari Supabase, beralih ke cache:", e);
     }
@@ -110,22 +99,7 @@ export async function getRaceQuestionsFromDb() {
         return mapped;
       }
 
-      // Jika masih kosong di Supabase, coba seed data default
-      const localCached = localStorage.getItem(LOCAL_STORAGE_RACE_KEY);
-      const initial = localCached ? JSON.parse(localCached) : defaultRaceQuestions;
-
-      const rowsToInsert = initial.map(q => ({
-        id: q.id,
-        story: q.story || '',
-        question: q.question,
-        options: q.options || [],
-        correct_option: q.correctOption ?? 0,
-        explanation: q.explanation || ''
-      }));
-
-      await supabase.from('race_questions').upsert(rowsToInsert);
-      localStorage.setItem(LOCAL_STORAGE_RACE_KEY, JSON.stringify(initial));
-      return initial;
+      // Jangan pernah otomatis menimpa (upsert) defaultRaceQuestions ke database saat pembacaan!
     } catch (e) {
       console.warn("Gagal membaca soal balap dari Supabase:", e);
     }

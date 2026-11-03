@@ -130,7 +130,7 @@ ATURAN KHUSUS:
     ],
     generationConfig: {
       temperature: 0.7,
-      maxOutputTokens: 8192,
+      maxOutputTokens: 65536,
       responseMimeType: "application/json"
     }
   };
@@ -402,7 +402,7 @@ Struktur data JSON wajib persis seperti ini:
     ],
     generationConfig: {
       temperature: 0.7,
-      maxOutputTokens: 8192,
+      maxOutputTokens: 65536,
       responseMimeType: "application/json"
     }
   };

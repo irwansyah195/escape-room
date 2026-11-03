@@ -15,8 +15,14 @@ import {
   RotateCcw,
   Upload,
   Flame,
-  Gamepad2
+  Gamepad2,
+  FileSpreadsheet,
+  Download
 } from 'lucide-react';
+import {
+  exportActiveRoomsToExcel,
+  exportRaceQuestionsToExcel
+} from '../../utils/excelQuestions';
 import {
   generateRoomsWithAI,
   generateRaceQuestionsWithAI,
@@ -80,22 +86,28 @@ export default function AiGeneratorModal({
 
     try {
       if (generatorMode === 'quiz_race') {
+        const finalCount = Math.max(1, Math.min(100, Number(questionCount) || 10));
+        setQuestionCount(finalCount);
         const questions = await generateRaceQuestionsWithAI({
           topic,
           materialText,
           difficulty,
-          questionCount: Number(questionCount),
+          questionCount: finalCount,
           apiKey
         });
         setPreviewRaceQuestions(questions);
         setPreviewRooms(null);
       } else {
+        const finalRooms = Math.max(1, Math.min(20, Number(roomCount) || 3));
+        const finalLocks = Math.max(1, Math.min(50, Number(locksPerRoom) || 2));
+        setRoomCount(finalRooms);
+        setLocksPerRoom(finalLocks);
         const rooms = await generateRoomsWithAI({
           topic,
           materialText,
           difficulty,
-          roomCount: Number(roomCount),
-          locksPerRoom: Number(locksPerRoom),
+          roomCount: finalRooms,
+          locksPerRoom: finalLocks,
           apiKey
         });
         setPreviewRooms(rooms);
@@ -366,54 +378,68 @@ export default function AiGeneratorModal({
                   padding: '16px 18px',
                   marginBottom: '20px'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
                     <label className="form-label" style={{ margin: 0, color: '#fbbf24', fontWeight: 800 }}>
-                      🏁 Jumlah Butir Soal Balapan
+                      🏁 Jumlah Butir Soal Balapan (Bebas Ketik Manual / Geser)
                     </label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <input
                         type="number"
-                        min={3}
-                        max={35}
+                        min={1}
+                        max={100}
                         value={questionCount}
                         onChange={(e) => {
-                          const val = Math.max(3, Math.min(35, Number(e.target.value) || 3));
-                          setQuestionCount(val);
+                          const raw = e.target.value;
+                          if (raw === '') {
+                            setQuestionCount('');
+                            return;
+                          }
+                          const num = parseInt(raw, 10);
+                          if (!isNaN(num)) {
+                            setQuestionCount(Math.max(1, Math.min(100, num)));
+                          }
                         }}
+                        onBlur={() => {
+                          const num = parseInt(questionCount, 10);
+                          if (isNaN(num) || num < 1) setQuestionCount(1);
+                          else if (num > 100) setQuestionCount(100);
+                        }}
+                        placeholder="1-100"
                         className="form-input"
-                        style={{ width: '70px', padding: '4px 8px', textAlign: 'center', fontWeight: 900, color: '#fbbf24', fontSize: '1.1em' }}
+                        style={{ width: '85px', padding: '6px 10px', textAlign: 'center', fontWeight: 900, color: '#fbbf24', fontSize: '1.1em' }}
                       />
-                      <span style={{ fontSize: '0.95em', fontWeight: 800, color: '#fbbf24' }}>
-                        Soal (Maks: 35)
+                      <span style={{ fontSize: '0.9em', fontWeight: 800, color: '#fbbf24' }}>
+                        Soal (Maks: 100)
                       </span>
                     </div>
                   </div>
                   <input
                     type="range"
-                    min={3}
-                    max={35}
-                    value={questionCount}
+                    min={1}
+                    max={100}
+                    value={Number(questionCount) || 1}
                     onChange={(e) => setQuestionCount(Number(e.target.value))}
                     style={{ width: '100%', accentColor: '#f59e0b', cursor: 'pointer' }}
                   />
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75em', color: '#94a3b8', marginTop: '4px' }}>
-                    <span>Sprint Pendek (3 Soal)</span>
-                    <span>Standar (15 Soal)</span>
-                    <span>Panjang (25 Soal)</span>
-                    <span>Maksimal (35 Soal)</span>
+                    <span>Min (1 Soal)</span>
+                    <span>25 Soal</span>
+                    <span>50 Soal</span>
+                    <span>75 Soal</span>
+                    <span>Maksimal (100 Soal)</span>
                   </div>
 
-                  {/* Preset Pilihan Cepat */}
-                  <div style={{ display: 'flex', gap: '6px', marginTop: '12px', flexWrap: 'wrap' }}>
-                    {[5, 10, 15, 20, 25, 30, 35].map(cnt => (
+                  {/* Preset Pilihan Cepat + Info Input Manual */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '12px', flexWrap: 'wrap' }}>
+                    {[5, 10, 15, 20, 25, 35, 50, 75, 100].map(cnt => (
                       <button
                         key={cnt}
                         type="button"
                         onClick={() => setQuestionCount(cnt)}
                         style={{
-                          background: questionCount === cnt ? '#f59e0b' : 'rgba(245, 158, 11, 0.15)',
-                          color: questionCount === cnt ? '#1e1b4b' : '#fcd34d',
-                          border: `1px solid ${questionCount === cnt ? '#f59e0b' : 'rgba(245, 158, 11, 0.4)'}`,
+                          background: Number(questionCount) === cnt ? '#f59e0b' : 'rgba(245, 158, 11, 0.15)',
+                          color: Number(questionCount) === cnt ? '#1e1b4b' : '#fcd34d',
+                          border: `1px solid ${Number(questionCount) === cnt ? '#f59e0b' : 'rgba(245, 158, 11, 0.4)'}`,
                           borderRadius: '8px',
                           padding: '4px 10px',
                           fontSize: '0.8em',
@@ -425,6 +451,9 @@ export default function AiGeneratorModal({
                         {cnt} Soal
                       </button>
                     ))}
+                    <span style={{ fontSize: '0.76em', color: '#cbd5e1', marginLeft: '4px' }}>
+                      (Atau ketik angka bebas 1–100 di kotak atas)
+                    </span>
                   </div>
 
                   {/* Info Skor Dinamis */}
@@ -454,38 +483,56 @@ export default function AiGeneratorModal({
                 }}>
                   <div>
                     <label className="form-label" style={{ color: '#c084fc', marginBottom: '6px' }}>
-                      Jumlah Ruangan Tematik
+                      Jumlah Ruangan Tematik (1 - 20)
                     </label>
-                    <select
+                    <input
+                      type="number"
+                      min={1}
+                      max={20}
                       className="form-input"
                       value={roomCount}
-                      onChange={(e) => setRoomCount(Number(e.target.value))}
-                    >
-                      <option value={1}>1 Ruangan</option>
-                      <option value={2}>2 Ruangan</option>
-                      <option value={3}>3 Ruangan (Standar)</option>
-                      <option value={4}>4 Ruangan</option>
-                      <option value={5}>5 Ruangan</option>
-                      <option value={6}>6 Ruangan</option>
-                      <option value={7}>7 Ruangan (Maksimal)</option>
-                    </select>
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === '') {
+                          setRoomCount('');
+                          return;
+                        }
+                        const num = parseInt(raw, 10);
+                        if (!isNaN(num)) setRoomCount(Math.max(1, Math.min(20, num)));
+                      }}
+                      onBlur={() => {
+                        const num = parseInt(roomCount, 10);
+                        if (isNaN(num) || num < 1) setRoomCount(1);
+                        else if (num > 20) setRoomCount(20);
+                      }}
+                    />
                   </div>
 
                   <div>
                     <label className="form-label" style={{ color: '#c084fc', marginBottom: '6px' }}>
-                      Gembok Soal per Ruangan
+                      Gembok Soal per Ruangan (Maks Total 100 Soal)
                     </label>
-                    <select
+                    <input
+                      type="number"
+                      min={1}
+                      max={50}
                       className="form-input"
                       value={locksPerRoom}
-                      onChange={(e) => setLocksPerRoom(Number(e.target.value))}
-                    >
-                      <option value={1}>1 Gembok Soal</option>
-                      <option value={2}>2 Gembok Soal (Standar)</option>
-                      <option value={3}>3 Gembok Soal</option>
-                      <option value={4}>4 Gembok Soal</option>
-                      <option value={5}>5 Gembok Soal (Maksimal)</option>
-                    </select>
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === '') {
+                          setLocksPerRoom('');
+                          return;
+                        }
+                        const num = parseInt(raw, 10);
+                        if (!isNaN(num)) setLocksPerRoom(Math.max(1, Math.min(50, num)));
+                      }}
+                      onBlur={() => {
+                        const num = parseInt(locksPerRoom, 10);
+                        if (isNaN(num) || num < 1) setLocksPerRoom(1);
+                        else if (num > 50) setLocksPerRoom(50);
+                      }}
+                    />
                   </div>
 
                   <div style={{
@@ -608,15 +655,37 @@ export default function AiGeneratorModal({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setPreviewRaceQuestions(null)}
-                  className="secondary-btn"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85em', borderRadius: '10px' }}
-                >
-                  <RotateCcw size={14} />
-                  <span>Generate Ulang</span>
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => exportRaceQuestionsToExcel(previewRaceQuestions, `soal_balap_ai_${new Date().toISOString().slice(0, 10)}.xlsx`)}
+                    className="secondary-btn"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '0.85em',
+                      borderRadius: '10px',
+                      color: '#4ade80',
+                      borderColor: 'rgba(34, 197, 94, 0.4)',
+                      background: 'rgba(34, 197, 94, 0.12)'
+                    }}
+                    title="Unduh hasil generate soal balap ke file Excel (.xlsx)"
+                  >
+                    <FileSpreadsheet size={15} />
+                    <span>Export Excel (.xlsx)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPreviewRaceQuestions(null)}
+                    className="secondary-btn"
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85em', borderRadius: '10px' }}
+                  >
+                    <RotateCcw size={14} />
+                    <span>Generate Ulang</span>
+                  </button>
+                </div>
               </div>
 
               {/* List Kartu Soal Balap */}
@@ -683,7 +752,7 @@ export default function AiGeneratorModal({
               </div>
 
               {/* Tombol Terapkan */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={() => setPreviewRaceQuestions(null)}
@@ -691,6 +760,26 @@ export default function AiGeneratorModal({
                   style={{ borderRadius: '12px', padding: '10px 20px' }}
                 >
                   Kembali
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => exportRaceQuestionsToExcel(previewRaceQuestions, `soal_balap_ai_${new Date().toISOString().slice(0, 10)}.xlsx`)}
+                  className="secondary-btn"
+                  style={{
+                    borderRadius: '12px',
+                    padding: '10px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: '#4ade80',
+                    borderColor: 'rgba(34, 197, 94, 0.45)',
+                    background: 'rgba(34, 197, 94, 0.14)',
+                    fontWeight: 800
+                  }}
+                >
+                  <Download size={16} />
+                  <span>Export Excel</span>
                 </button>
 
                 <button
@@ -741,15 +830,37 @@ export default function AiGeneratorModal({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setPreviewRooms(null)}
-                  className="secondary-btn"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85em', borderRadius: '10px' }}
-                >
-                  <RotateCcw size={14} />
-                  <span>Generate Ulang</span>
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => exportActiveRoomsToExcel(previewRooms, `soal_escape_room_ai_${new Date().toISOString().slice(0, 10)}.xlsx`)}
+                    className="secondary-btn"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      fontSize: '0.85em',
+                      borderRadius: '10px',
+                      color: '#4ade80',
+                      borderColor: 'rgba(34, 197, 94, 0.4)',
+                      background: 'rgba(34, 197, 94, 0.12)'
+                    }}
+                    title="Unduh hasil generate ruangan & soal Escape Room ke file Excel (.xlsx)"
+                  >
+                    <FileSpreadsheet size={15} />
+                    <span>Export Excel (.xlsx)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPreviewRooms(null)}
+                    className="secondary-btn"
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85em', borderRadius: '10px' }}
+                  >
+                    <RotateCcw size={14} />
+                    <span>Generate Ulang</span>
+                  </button>
+                </div>
               </div>
 
               {/* List Kartu Ruangan Preview */}
@@ -798,7 +909,7 @@ export default function AiGeneratorModal({
               </div>
 
               {/* Tombol Terapkan */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={() => setPreviewRooms(null)}
@@ -806,6 +917,26 @@ export default function AiGeneratorModal({
                   style={{ borderRadius: '12px', padding: '10px 20px' }}
                 >
                   Kembali
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => exportActiveRoomsToExcel(previewRooms, `soal_escape_room_ai_${new Date().toISOString().slice(0, 10)}.xlsx`)}
+                  className="secondary-btn"
+                  style={{
+                    borderRadius: '12px',
+                    padding: '10px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    color: '#4ade80',
+                    borderColor: 'rgba(34, 197, 94, 0.45)',
+                    background: 'rgba(34, 197, 94, 0.14)',
+                    fontWeight: 800
+                  }}
+                >
+                  <Download size={16} />
+                  <span>Export Excel</span>
                 </button>
 
                 <button

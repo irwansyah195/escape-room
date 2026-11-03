@@ -37,7 +37,7 @@ import {
   kickPlayer
 } from '../../utils/sessionSync';
 import { getStoredRaceQuestions, defaultRaceQuestions } from '../../data/defaultRaceQuestions';
-import { saveStudentResult } from '../../supabase/db';
+import { saveStudentResult, getRaceQuestionsFromDb } from '../../supabase/db';
 import PhaserCanvas from '../game/PhaserCanvas';
 import PodiumModal from '../game/PodiumModal';
 import Swal from '../../utils/swal';
@@ -120,9 +120,15 @@ export default function ClassSessionTab({ rooms }) {
 
     try {
       const pin = generateSessionPin();
-      let raceQs = selectedMode === 'quiz_race' ? getStoredRaceQuestions() : null;
-      if (selectedMode === 'quiz_race' && (!raceQs || raceQs.length === 0)) {
-        raceQs = defaultRaceQuestions;
+      let raceQs = null;
+      if (selectedMode === 'quiz_race') {
+        raceQs = await getRaceQuestionsFromDb();
+        if (!raceQs || raceQs.length === 0) {
+          raceQs = getStoredRaceQuestions();
+        }
+        if (!raceQs || raceQs.length === 0) {
+          raceQs = defaultRaceQuestions;
+        }
       }
       if (Array.isArray(raceQs)) {
         raceQs = raceQs.map(q => ({ ...q, timeLimit: timePerQuestion }));

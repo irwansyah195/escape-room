@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import GamePage from './pages/GamePage';
 import DosenPage from './pages/DosenPage';
-import { getRoomsFromDb } from './firebase/config';
+import { getRoomsFromDb, getRaceQuestionsFromDb } from './firebase/config';
 import { defaultRooms } from './data/defaultRooms';
 
 export default function App() {
   const [rooms, setRooms] = useState(defaultRooms);
   const [loadingRooms, setLoadingRooms] = useState(true);
 
-  // Ambil data ruangan & soal dari Firestore / cache saat aplikasi dibuka
+  // Ambil data ruangan & soal balap dari database (Supabase) saat aplikasi dibuka
   useEffect(() => {
     async function loadRooms() {
       try {
-        const fetchedRooms = await getRoomsFromDb();
+        const [fetchedRooms] = await Promise.all([
+          getRoomsFromDb(),
+          getRaceQuestionsFromDb()
+        ]);
         if (fetchedRooms && fetchedRooms.length > 0) {
           setRooms(fetchedRooms);
         }
