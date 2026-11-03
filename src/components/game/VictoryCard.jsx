@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { Trophy, RotateCcw, CheckCircle2, AlertTriangle, BookOpen } from 'lucide-react';
+import { Trophy, RotateCcw, BookOpen } from 'lucide-react';
 import { saveStudentResult } from '../../firebase/config';
 
 export default function VictoryCard({
@@ -90,7 +90,7 @@ export default function VictoryCard({
 
   return (
     <div className="game-card final-card">
-      <div className="final-emoji">🏆🎈</div>
+      <div className="final-emoji">🏆</div>
       <h2 style={{ color: '#c084fc', margin: '0 0 4px', fontSize: '1.8em' }}>
         Selamat, {student.name}!
       </h2>
@@ -125,24 +125,6 @@ export default function VictoryCard({
           <li><b>Cooperative & Sociodramatic Play</b>: Pembagian peran terkoordinasi dan alur cerita yang disepakati bersama.</li>
           <li><b>Games with Rules</b>: Puncak kematangan sosial (Parten & Piaget) dengan kepatuhan giliran dan regulasi diri.</li>
         </ul>
-      </div>
-
-      {/* Status Penyimpanan Database */}
-      <div style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '6px',
-        margin: '12px 0 20px',
-        padding: '8px 16px',
-        borderRadius: 'var(--radius-full)',
-        background: saveStatus.success ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)',
-        color: saveStatus.success ? '#6ee7b7' : '#fde047',
-        border: `1px solid ${saveStatus.success ? 'rgba(16, 185, 129, 0.4)' : 'rgba(245, 158, 11, 0.4)'}`,
-        fontSize: '0.92em',
-        fontWeight: 600
-      }}>
-        {saveStatus.success ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
-        <span>{saveStatus.msg}</span>
       </div>
 
       <div className="btnrow" style={{ justifyContent: 'center' }}>

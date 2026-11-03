@@ -75,7 +75,7 @@ export default function PodiumModal({ players, onClose, isDosen = false }) {
         {/* Header Kemenangan */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#facc15', fontSize: '1.2em', fontWeight: 900, marginBottom: '8px' }}>
           <Sparkles size={24} />
-          <span>UPACARA PODIUM JUARA</span>
+          <span>PODIUM JUARA</span>
           <Sparkles size={24} />
         </div>
         <h2 style={{ margin: '0 0 10px', fontSize: '1.8em', color: '#f8fafc', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
