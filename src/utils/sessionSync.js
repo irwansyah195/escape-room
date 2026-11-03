@@ -211,8 +211,18 @@ function getSessionFromStorage(pin) {
   return null;
 }
 
+// Cek apakah berjalan di lingkungan lokal (Vite Dev Server)
+const isLocalEnv = typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname.startsWith('192.168.') ||
+  window.location.hostname.endsWith('.local')
+);
+
 // Helper untuk memanggil API server internal (Vite Dev Server Plugin)
 async function apiFetch(endpoint, options = {}) {
+  // Hanya panggil API internal di localhost/LAN; di cloud/Netlify sync ditangani Supabase
+  if (!isLocalEnv) return null;
   try {
     const res = await fetch(endpoint, {
       ...options,
@@ -601,10 +611,10 @@ export async function joinClassSession(pin, student) {
         nim: playerData.nim,
         character_type: playerData.characterType,
         character_color: playerData.characterColor,
-        score: playerData.score,
-        solved_count: playerData.solvedCount,
-        progress_idx: playerData.checkpointIdx,
-        total_questions: student.totalQuestions || 5,
+        score: Math.round(Number(playerData.score) || 0),
+        solved_count: Math.round(Number(playerData.solvedCount) || 0),
+        progress_idx: Math.round(Number(playerData.checkpointIdx) || 0),
+        total_questions: Math.round(Number(student.totalQuestions) || 5),
         last_seen: now,
         updated_at: new Date().toISOString()
       });
@@ -761,13 +771,13 @@ export async function updatePlayerProgress(pin, uid, progress) {
         last_seen: now,
         updated_at: new Date().toISOString()
       };
-      if (progress.score !== undefined) sbData.score = progress.score;
-      if (progress.solvedCount !== undefined) sbData.solved_count = progress.solvedCount;
-      if (progress.checkpointIdx !== undefined) sbData.progress_idx = progress.checkpointIdx;
+      if (progress.score !== undefined) sbData.score = Math.round(Number(progress.score) || 0);
+      if (progress.solvedCount !== undefined) sbData.solved_count = Math.round(Number(progress.solvedCount) || 0);
+      if (progress.checkpointIdx !== undefined) sbData.progress_idx = Math.round(Number(progress.checkpointIdx) || 0);
       if (progress.characterType !== undefined) sbData.character_type = progress.characterType;
       if (progress.characterColor !== undefined) sbData.character_color = progress.characterColor;
       if (progress.isFinished !== undefined) sbData.is_finished = progress.isFinished;
-      if (progress.finishRank !== undefined) sbData.finish_rank = progress.finishRank;
+      if (progress.finishRank !== undefined) sbData.finish_rank = Math.round(Number(progress.finishRank) || 0);
 
       await supabase.from('session_players').update(sbData).eq('id', `${pin}_${uid}`);
     } catch (err) {}

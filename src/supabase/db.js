@@ -192,13 +192,18 @@ export async function saveStudentRecordToDb(record) {
   const totalCount = typeof record.totalLocks === 'number' ? record.totalLocks : (typeof record.totalQuestions === 'number' ? record.totalQuestions : (answersList.length || 20));
   const timeStampIso = record.timestamp || record.submittedAt || (record.createdAt ? new Date(record.createdAt).toISOString() : new Date().toISOString());
 
+  const numScore = Number(record.score);
+  const safeScore = Number.isFinite(numScore) ? Math.round(numScore) : 0;
+  const safeCorrect = Number.isFinite(Number(correctCount)) ? Math.round(Number(correctCount)) : 0;
+  const safeTotal = Number.isFinite(Number(totalCount)) ? Math.round(Number(totalCount)) : 20;
+
   const payload = {
     id: resultId,
     name: (record.nama || record.name || '').trim(),
     nim: (record.nim || '').trim(),
-    score: typeof record.score === 'number' ? record.score : 0,
-    total_correct: correctCount,
-    total_questions: totalCount,
+    score: safeScore,
+    total_correct: safeCorrect,
+    total_questions: safeTotal,
     session_mode: record.sessionMode || 'quiz_race',
     session_pin: record.sessionPin || null,
     answers_record: answersList,
