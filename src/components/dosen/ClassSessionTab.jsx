@@ -39,6 +39,7 @@ import { getStoredRaceQuestions, defaultRaceQuestions } from '../../data/default
 import { saveStudentResult } from '../../supabase/db';
 import PhaserCanvas from '../game/PhaserCanvas';
 import PodiumModal from '../game/PodiumModal';
+import Swal from '../../utils/swal';
 
 export default function ClassSessionTab({ rooms }) {
   const [activeSession, setActiveSession] = useState(() => getSavedClassSession());
@@ -136,7 +137,11 @@ export default function ClassSessionTab({ rooms }) {
       setActiveSession(session);
     } catch (err) {
       console.error("Gagal membuat sesi:", err);
-      alert("Gagal membuat sesi: " + (err.message || err));
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Membuat Sesi',
+        text: err.message || String(err)
+      });
     } finally {
       setIsCreating(false);
     }
@@ -151,7 +156,11 @@ export default function ClassSessionTab({ rooms }) {
       setActiveSession(prev => ({ ...prev, status: 'starting' }));
     } catch (err) {
       console.error("Gagal memulai pertandingan:", err);
-      alert("Gagal memulai pertandingan: " + err.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Memulai',
+        text: err.message || String(err)
+      });
     } finally {
       setIsStarting(false);
     }
@@ -187,7 +196,17 @@ export default function ClassSessionTab({ rooms }) {
   // Dosen mengakhiri balapan dan menampilkan podium
   const handleFinishRaceGame = async () => {
     if (!activeSession) return;
-    if (window.confirm("Akhiri pertandingan sekarang dan tampilkan Podium Juara?")) {
+    const res = await Swal.fire({
+      title: 'Akhiri Pertandingan?',
+      text: 'Akhiri pertandingan sekarang dan tampilkan Podium Juara ke seluruh mahasiswa?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Akhiri Sekarang',
+      cancelButtonText: 'Batal'
+    });
+    if (res.isConfirmed) {
       await finishClassSession(activeSession.pin);
       await archiveSessionResults(activeSession.pin, connectedPlayers);
       setActiveSession(prev => ({ ...prev, status: 'finished' }));
@@ -197,7 +216,17 @@ export default function ClassSessionTab({ rooms }) {
 
   const handleEndSession = async () => {
     if (!activeSession) return;
-    if (window.confirm("Yakin ingin menutup sesi kelas ini? Sesi akan diarsipkan dan koneksi pemain dihentikan.")) {
+    const res = await Swal.fire({
+      title: 'Tutup Sesi Kelas?',
+      text: 'Yakin ingin menutup sesi kelas ini? Sesi akan diarsipkan dan koneksi pemain dihentikan.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Tutup Sesi',
+      cancelButtonText: 'Batal'
+    });
+    if (res.isConfirmed) {
       await archiveSessionResults(activeSession.pin, connectedPlayers);
       await closeClassSession(activeSession.pin);
       setActiveSession(null);
@@ -207,7 +236,17 @@ export default function ClassSessionTab({ rooms }) {
 
   const handleKickPlayer = async (uid, name) => {
     if (!activeSession?.pin || !uid) return;
-    if (window.confirm(`Keluarkan mahasiswa "${name || 'ini'}" dari ruang tunggu?`)) {
+    const res = await Swal.fire({
+      title: 'Keluarkan Mahasiswa?',
+      text: `Keluarkan mahasiswa "${name || 'ini'}" dari ruang tunggu?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Keluarkan',
+      cancelButtonText: 'Batal'
+    });
+    if (res.isConfirmed) {
       await kickPlayer(activeSession.pin, uid);
       setConnectedPlayers(prev => {
         const next = { ...prev };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Search, Trash2, Eye, RefreshCw, FileSpreadsheet, Users, Award, TrendingUp } from 'lucide-react';
 import { getStudentResults, deleteStudentResult } from '../../firebase/config';
+import Swal from '../../utils/swal';
 import { exportToExcel, exportToCSV } from '../../utils/exportExcel';
 import ResultDetailModal from './ResultDetailModal';
 
@@ -35,15 +36,35 @@ export default function ResultRecap() {
 
   const handleDelete = async (rec) => {
     const studentName = rec.name || rec.nama || 'Mahasiswa';
-    const confirmDelete = window.confirm(`Apakah Anda yakin ingin menghapus data nilai mahasiswa: "${studentName}" (${rec.nim})?`);
-    if (!confirmDelete) return;
+    const res = await Swal.fire({
+      title: 'Hapus Rekap Nilai?',
+      html: `Apakah Anda yakin ingin menghapus data nilai mahasiswa:<br/><b>${studentName}</b> (${rec.nim})?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal'
+    });
+    if (!res.isConfirmed) return;
 
     setDeletingId(rec.id);
     try {
       await deleteStudentResult(rec.id);
       setRecords(prev => prev.filter(r => r.id !== rec.id));
+      Swal.fire({
+        icon: 'success',
+        title: 'Terhapus!',
+        text: 'Data nilai mahasiswa telah dihapus.',
+        timer: 1500,
+        showConfirmButton: false
+      });
     } catch (err) {
-      alert('Gagal menghapus data: ' + err.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Menghapus',
+        text: err.message
+      });
     } finally {
       setDeletingId(null);
     }

@@ -20,6 +20,7 @@ import {
 import { getStoredRaceQuestions, defaultRaceQuestions } from '../data/defaultRaceQuestions';
 import { supabase, isSupabaseConfigured } from '../supabase/client';
 import { saveStudentResult } from '../supabase/db';
+import Swal from '../utils/swal';
 import { Shield, Sparkles, Gamepad2, Flame, Layout, LogOut, CheckCircle2, AlertCircle, Trophy, Clock } from 'lucide-react';
 
 const STORAGE_GAME_STATE_KEY = 'dunia_bermain_student_gamestate';
@@ -683,8 +684,18 @@ export default function GamePage({ rooms, loadingRooms }) {
               {/* Tombol Keluar Sesi dengan Konfirmasi */}
               <button
                 type="button"
-                onClick={() => {
-                  if (window.confirm("Yakin ingin keluar dari sesi permainan ini? Progres di perangkat ini akan direset.")) {
+                onClick={async () => {
+                  const res = await Swal.fire({
+                    title: 'Keluar Permainan?',
+                    text: 'Yakin ingin keluar dari sesi permainan ini? Progres di perangkat ini akan direset.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Ya, Keluar',
+                    cancelButtonText: 'Batal'
+                  });
+                  if (res.isConfirmed) {
                     handleRestart();
                   }
                 }}

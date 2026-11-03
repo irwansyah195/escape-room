@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import Swal from './swal';
 
 /**
  * Ekspor data rekapitulasi nilai mahasiswa ke file Excel (.xlsx) dengan 2 sheet:
@@ -7,7 +8,11 @@ import * as XLSX from 'xlsx';
  */
 export function exportToExcel(records) {
   if (!records || records.length === 0) {
-    alert("Belum ada data untuk diunduh.");
+    Swal.fire({
+      icon: 'info',
+      title: 'Data Kosong',
+      text: 'Belum ada data untuk diunduh.'
+    });
     return;
   }
 
@@ -84,7 +89,11 @@ export function exportToExcel(records) {
  */
 export function exportToCSV(records) {
   if (!records || records.length === 0) {
-    alert("Belum ada data untuk diunduh.");
+    Swal.fire({
+      icon: 'info',
+      title: 'Data Kosong',
+      text: 'Belum ada data untuk diunduh.'
+    });
     return;
   }
 

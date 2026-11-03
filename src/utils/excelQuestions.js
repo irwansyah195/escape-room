@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
+import Swal from './swal';
 
 /**
  * Header Kolom Baku untuk Format Excel Soal Escape Room
@@ -267,7 +268,11 @@ export async function generateQuestionTemplate() {
  */
 export async function exportActiveRoomsToExcel(rooms) {
   if (!rooms || rooms.length === 0) {
-    alert("Tidak ada ruangan soal untuk diekspor.");
+    Swal.fire({
+      icon: 'info',
+      title: 'Data Kosong',
+      text: 'Tidak ada ruangan soal untuk diekspor.'
+    });
     return;
   }
 

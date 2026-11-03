@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { getStoredRaceQuestions, saveStoredRaceQuestions, defaultRaceQuestions } from '../../data/defaultRaceQuestions';
 import AiGeneratorModal from './AiGeneratorModal';
+import Swal from '../../utils/swal';
 
 export default function RaceQuestionManager({ onRaceQuestionsUpdated }) {
   const [questions, setQuestions] = useState(() => getStoredRaceQuestions());
@@ -80,16 +81,83 @@ export default function RaceQuestionManager({ onRaceQuestionsUpdated }) {
     setEditingQuestion(null);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Hapus butir soal balap ini?")) {
+  const handleDelete = async (id) => {
+    const res = await Swal.fire({
+      title: 'Hapus Soal Ini?',
+      text: 'Butir soal kuis balap yang dipilih akan dihapus.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal'
+    });
+    if (res.isConfirmed) {
       const updated = questions.filter(q => q.id !== id);
       updateQuestionsState(updated);
+      Swal.fire({
+        icon: 'success',
+        title: 'Terhapus!',
+        text: 'Soal telah dihapus.',
+        timer: 1500,
+        showConfirmButton: false
+      });
     }
   };
 
-  const handleResetToDefault = () => {
-    if (window.confirm("Reset seluruh bank soal balap ke soal bawaan sistem?")) {
+  const handleDeleteAll = async () => {
+    if (questions.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Bank Soal Kosong',
+        text: 'Tidak ada butir soal untuk dihapus.'
+      });
+      return;
+    }
+
+    const res = await Swal.fire({
+      title: 'Hapus Semua Soal?',
+      html: `Apakah Anda yakin ingin menghapus seluruh <b>${questions.length} butir soal</b> di bank soal balap?<br/><span style="color: #f87171; font-size: 0.9em;">Tindakan ini akan mengosongkan seluruh soal kuis balap!</span>`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Hapus Semua!',
+      cancelButtonText: 'Batal'
+    });
+
+    if (res.isConfirmed) {
+      updateQuestionsState([]);
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil Dikosongkan!',
+        text: 'Seluruh butir soal balap telah berhasil dihapus.',
+        timer: 1800,
+        showConfirmButton: false
+      });
+    }
+  };
+
+  const handleResetToDefault = async () => {
+    const res = await Swal.fire({
+      title: 'Reset ke Soal Default?',
+      text: 'Bank soal akan dipulihkan ke 20 butir soal observasi anak standar bawaan sistem.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#f59e0b',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Pulihkan Default',
+      cancelButtonText: 'Batal'
+    });
+    if (res.isConfirmed) {
       updateQuestionsState(defaultRaceQuestions);
+      Swal.fire({
+        icon: 'success',
+        title: 'Dipulihkan!',
+        text: 'Bank soal berhasil dipulihkan ke soal bawaan.',
+        timer: 1800,
+        showConfirmButton: false
+      });
     }
   };
 
@@ -259,6 +327,26 @@ export default function RaceQuestionManager({ onRaceQuestionsUpdated }) {
           >
             <RotateCcw size={16} />
             <span>Reset Default</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDeleteAll}
+            className="secondary-btn"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.85em',
+              borderRadius: '10px',
+              color: '#fca5a5',
+              borderColor: 'rgba(239, 68, 68, 0.4)',
+              background: 'rgba(239, 68, 68, 0.12)'
+            }}
+            title="Hapus seluruh butir soal balapan"
+          >
+            <Trash2 size={16} color="#ef4444" />
+            <span>Hapus Semua</span>
           </button>
 
           <button

@@ -23,6 +23,7 @@ import { EmojiPickerGrid, ROOM_ICONS, KEY_REWARDS } from './EmojiPicker';
 import { generateQuestionTemplate, exportActiveRoomsToExcel } from '../../utils/excelQuestions';
 import UploadExcelModal from './UploadExcelModal';
 import AiGeneratorModal from './AiGeneratorModal';
+import Swal from '../../utils/swal';
 
 export default function QuestionManager({ rooms, onUpdateRooms }) {
   // State untuk modal edit ruangan
@@ -86,7 +87,11 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
     const { isNew, roomIdx, roomData } = editingRoom;
 
     if (!roomData.title.trim() || !roomData.text.trim()) {
-      alert('Judul ruangan dan narasi skenario wajib diisi.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Form Belum Lengkap',
+        text: 'Judul ruangan dan narasi skenario wajib diisi.'
+      });
       return;
     }
 
@@ -107,15 +112,30 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
 
   const handleDeleteRoom = async (roomIdx) => {
     const targetRoom = rooms[roomIdx];
-    const confirmDel = window.confirm(`Apakah Anda yakin ingin menghapus ruangan "${targetRoom.title}" beserta seluruh soal di dalamnya?`);
-    if (!confirmDel) return;
+    const res = await Swal.fire({
+      title: 'Hapus Ruangan?',
+      text: `Apakah Anda yakin ingin menghapus ruangan "${targetRoom.title}" beserta seluruh soal di dalamnya?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal'
+    });
+    if (!res.isConfirmed) return;
 
     const updatedRooms = rooms.filter((_, idx) => idx !== roomIdx);
     setIsSaving(true);
     await saveRoomsToDb(updatedRooms);
     onUpdateRooms(updatedRooms);
     setIsSaving(false);
-    notify('success', `Ruangan "${targetRoom.title}" telah dihapus.`);
+    Swal.fire({
+      icon: 'success',
+      title: 'Terhapus!',
+      text: `Ruangan "${targetRoom.title}" telah dihapus.`,
+      timer: 1500,
+      showConfirmButton: false
+    });
   };
 
   // -------------------------------------------------------------
@@ -152,14 +172,22 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
     const { roomIdx, lockIdx, isNew, lockData } = editingLock;
 
     if (!lockData.q.trim()) {
-      alert('Teks pertanyaan gembok wajib diisi.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Pertanyaan Kosong',
+        text: 'Teks pertanyaan gembok wajib diisi.'
+      });
       return;
     }
 
     // Pastikan setiap opsi terisi
     const filledOptions = lockData.options.map(o => o.trim()).filter(Boolean);
     if (filledOptions.length < 2) {
-      alert('Minimal harus ada 2 pilihan ganda yang tidak kosong.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Pilihan Jawaban Kurang',
+        text: 'Minimal harus ada 2 pilihan ganda yang tidak kosong.'
+      });
       return;
     }
 
@@ -194,8 +222,17 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
   };
 
   const handleDeleteLock = async (roomIdx, lockIdx) => {
-    const confirmDel = window.confirm('Hapus gembok / soal ini?');
-    if (!confirmDel) return;
+    const res = await Swal.fire({
+      title: 'Hapus Gembok Soal?',
+      text: 'Soal gembok yang dipilih akan dihapus dari ruangan ini.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal'
+    });
+    if (!res.isConfirmed) return;
 
     const updatedRooms = [...rooms];
     const roomToUpdate = { ...updatedRooms[roomIdx] };
@@ -206,21 +243,77 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
     await saveRoomsToDb(updatedRooms);
     onUpdateRooms(updatedRooms);
     setIsSaving(false);
-    notify('success', 'Soal gembok telah dihapus.');
+    Swal.fire({
+      icon: 'success',
+      title: 'Terhapus!',
+      text: 'Soal gembok telah dihapus.',
+      timer: 1500,
+      showConfirmButton: false
+    });
   };
 
   // -------------------------------------------------------------
-  // RESET KE DEFAULT
+  // RESET KE DEFAULT & HAPUS SEMUA
   // -------------------------------------------------------------
   const handleResetDefault = async () => {
-    const confirmReset = window.confirm('PERINGATAN: Anda akan mereset seluruh soal & ruangan kembali ke soal default bawaan psikologi anak. Lanjutkan?');
-    if (!confirmReset) return;
+    const res = await Swal.fire({
+      title: 'Reset ke Soal Default?',
+      text: 'PERINGATAN: Seluruh soal & ruangan akan direset kembali ke soal default bawaan psikologi anak.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#f59e0b',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Reset Default',
+      cancelButtonText: 'Batal'
+    });
+    if (!res.isConfirmed) return;
 
     setIsSaving(true);
     await resetRoomsInDb();
     onUpdateRooms(defaultRooms);
     setIsSaving(false);
-    notify('success', 'Soal berhasil direset ke pengaturan default bawaan!');
+    Swal.fire({
+      icon: 'success',
+      title: 'Dipulihkan!',
+      text: 'Soal berhasil direset ke pengaturan default bawaan.',
+      timer: 1800,
+      showConfirmButton: false
+    });
+  };
+
+  const handleDeleteAllRooms = async () => {
+    if (rooms.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Kosong',
+        text: 'Tidak ada ruangan atau soal untuk dihapus.'
+      });
+      return;
+    }
+
+    const res = await Swal.fire({
+      title: 'Hapus Semua Ruangan & Soal?',
+      html: `Apakah Anda yakin ingin menghapus seluruh <b>${rooms.length} ruangan</b> beserta semua gembok soal?<br/><span style="color: #f87171; font-size: 0.9em;">Tindakan ini akan mengosongkan seluruh konten Escape Room!</span>`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Ya, Hapus Semua!',
+      cancelButtonText: 'Batal'
+    });
+    if (!res.isConfirmed) return;
+
+    setIsSaving(true);
+    await saveRoomsToDb([]);
+    onUpdateRooms([]);
+    setIsSaving(false);
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil Dikosongkan!',
+      text: 'Seluruh ruangan dan soal telah dihapus.',
+      timer: 1800,
+      showConfirmButton: false
+    });
   };
 
   return (
@@ -314,6 +407,17 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
           >
             <RotateCcw size={16} />
             <span>Reset ke Soal Bawaan</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn-confirm-no"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#b91c1c', borderColor: '#fca5a5', background: 'rgba(239, 68, 68, 0.08)' }}
+            onClick={handleDeleteAllRooms}
+            title="Kosongkan seluruh ruangan dan soal"
+          >
+            <Trash2 size={16} color="#ef4444" />
+            <span>Hapus Semua Ruangan</span>
           </button>
         </div>
       </div>
