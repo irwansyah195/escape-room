@@ -127,15 +127,24 @@ export default function VictoryCard({
         </ul>
       </div>
 
-      <div className="btnrow" style={{ justifyContent: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '20px' }}>
         <button
           type="button"
           className="main-btn"
-          style={{ maxWidth: '280px' }}
+          style={{
+            maxWidth: '320px',
+            width: '100%',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            margin: '0 auto',
+            textAlign: 'center'
+          }}
           onClick={onRestart}
         >
           <RotateCcw size={18} />
-          Main Lagi
+          <span>Main Lagi</span>
         </button>
       </div>
     </div>

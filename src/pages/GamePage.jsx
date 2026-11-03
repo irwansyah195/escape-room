@@ -756,7 +756,7 @@ export default function GamePage({ rooms, loadingRooms }) {
             />
 
             {/* Tombol Buka Podium Kemenangan */}
-            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+            <div style={{ textAlign: 'center', marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
               <button
                 type="button"
                 onClick={() => setShowPodium(true)}
@@ -772,7 +772,11 @@ export default function GamePage({ rooms, loadingRooms }) {
                   boxShadow: '0 8px 24px rgba(245, 158, 11, 0.4)',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '10px'
+                  justifyContent: 'center',
+                  gap: '10px',
+                  maxWidth: '320px',
+                  width: '100%',
+                  margin: '0 auto'
                 }}
               >
                 <Trophy size={22} />
