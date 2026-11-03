@@ -15,3 +15,4 @@ const CustomSwal = Swal.mixin({
 
 export default CustomSwal;
 export { Swal };
+

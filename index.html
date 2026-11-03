@@ -12,6 +12,22 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function() {
+        var cleanNetlify = function() {
+          var els = document.querySelectorAll('iframe[src*="netlify"], iframe[id*="netlify"], #netlify-drawer, .netlify-badge, [data-netlify-deploy-id]');
+          for (var i = 0; i < els.length; i++) {
+            try { els[i].remove(); } catch(e) {}
+          }
+        };
+        try {
+          var obs = new MutationObserver(cleanNetlify);
+          obs.observe(document.documentElement, { childList: true, subtree: true });
+        } catch(e) {}
+        window.addEventListener('DOMContentLoaded', cleanNetlify);
+        window.addEventListener('load', cleanNetlify);
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
