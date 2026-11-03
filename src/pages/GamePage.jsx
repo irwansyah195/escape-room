@@ -765,7 +765,7 @@ export default function GamePage({ rooms, loadingRooms }) {
                 }}
               >
                 <Trophy size={22} />
-                <span>Lihat Podium Juara 🏆</span>
+                <span>Lihat Podium Juara</span>
               </button>
             </div>
           </div>

@@ -215,7 +215,7 @@ export default function WaitingLobby({ student, onUpdateStudent, onCountdownComp
               marginBottom: '8px'
             }}>
               {isRaceMode ? <Flame size={16} /> : <Gamepad2 size={16} />}
-              <span>{isRaceMode ? '🏎️ QUIZ SPRINT RACE (BALAP KUIS)' : '🎮 ESCAPE ROOM 2D'}</span>
+              <span>{isRaceMode ? 'QUIZ SPRINT RACE (BALAP KUIS)' : 'ESCAPE ROOM 2D'}</span>
               <span>•</span>
               <span style={{ color: '#4ade80' }}>LOBBY RUANG TUNGGU</span>
             </div>

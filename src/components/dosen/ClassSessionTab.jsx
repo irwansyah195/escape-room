@@ -493,7 +493,7 @@ export default function ClassSessionTab({ rooms }) {
                 }}
               >
                 <Play size={20} />
-                <span>{isCreating ? 'Mempersiapkan Sesi...' : '🚀 Buka Sesi Kelas & Buat PIN'}</span>
+                <span>{isCreating ? 'Mempersiapkan Sesi...' : 'Buka Sesi Kelas & Buat PIN'}</span>
               </button>
             </div>
           </form>
@@ -669,7 +669,7 @@ export default function ClassSessionTab({ rooms }) {
                 }}
               >
                 <Flame size={26} />
-                <span>{isStarting ? 'Memulai Hitung Mundur...' : '🚀 MULAI PERTANDINGAN (GO!)'}</span>
+                <span>{isStarting ? 'Memulai Hitung Mundur...' : 'MULAI PERTANDINGAN (GO!)'}</span>
               </button>
             </div>
           )}
@@ -731,7 +731,7 @@ export default function ClassSessionTab({ rooms }) {
                     title="Fokus Layar Penuh Proyektor"
                   >
                     {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-                    <span>{isFullscreen ? 'Keluar Fullscreen' : '🖥️ Layar Penuh (Fullscreen)'}</span>
+                    <span>{isFullscreen ? 'Keluar Fullscreen' : 'Layar Penuh (Fullscreen)'}</span>
                   </button>
 
                   <button
@@ -773,7 +773,7 @@ export default function ClassSessionTab({ rooms }) {
                     }}
                   >
                     <CheckCircle2 size={16} />
-                    <span>🏁 Akhiri Balapan & Kunci Nilai</span>
+                    <span>Akhiri Balapan & Kunci Nilai</span>
                   </button>
                 </div>
               </div>

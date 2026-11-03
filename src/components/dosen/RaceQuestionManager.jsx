@@ -290,7 +290,7 @@ export default function RaceQuestionManager({ onRaceQuestionsUpdated }) {
             }}
           >
             <Sparkles size={18} />
-            <span>✨ AI Generate Soal Balap</span>
+            <span>AI Generate Soal Balap</span>
           </button>
         </div>
       </div>
@@ -377,7 +377,7 @@ export default function RaceQuestionManager({ onRaceQuestionsUpdated }) {
               }}
             >
               <Sparkles size={18} />
-              <span>✨ Buat Soal Otomatis dengan AI</span>
+              <span>Buat Soal Otomatis dengan AI</span>
             </button>
 
             <button
@@ -395,7 +395,7 @@ export default function RaceQuestionManager({ onRaceQuestionsUpdated }) {
               }}
             >
               <Plus size={18} />
-              <span>➕ Tambah Soal Manual</span>
+              <span>Tambah Soal Manual</span>
             </button>
 
             <button
@@ -413,7 +413,7 @@ export default function RaceQuestionManager({ onRaceQuestionsUpdated }) {
               }}
             >
               <RotateCcw size={18} />
-              <span>🔄 Muat Soal Bawaan (Default)</span>
+              <span>Muat Soal Bawaan (Default)</span>
             </button>
           </div>
         </div>

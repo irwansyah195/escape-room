@@ -389,7 +389,7 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
               }}
             >
               <Sparkles size={18} />
-              <span>✨ Buat Ruangan dengan AI</span>
+              <span>Buat Ruangan dengan AI</span>
             </button>
 
             <button
@@ -406,7 +406,7 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
               }}
             >
               <Upload size={18} />
-              <span>📥 Impor dari Excel</span>
+              <span>Impor dari Excel</span>
             </button>
 
             <button
@@ -423,7 +423,7 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
               }}
             >
               <Plus size={18} />
-              <span>➕ Tambah Ruangan Manual</span>
+              <span>Tambah Ruangan Manual</span>
             </button>
 
             <button
@@ -440,7 +440,7 @@ export default function QuestionManager({ rooms, onUpdateRooms }) {
               }}
             >
               <RotateCcw size={18} />
-              <span>🔄 Muat Ruangan Bawaan</span>
+              <span>Muat Ruangan Bawaan</span>
             </button>
           </div>
         </div>

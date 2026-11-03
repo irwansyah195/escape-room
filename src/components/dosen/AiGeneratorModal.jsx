@@ -213,7 +213,7 @@ export default function AiGeneratorModal({
             }}
           >
             <Flame size={18} />
-            <span>🏎️ Mode Game Balap (Murni Butir Soal)</span>
+            <span>Mode Game Balap (Murni Butir Soal)</span>
           </button>
 
           {/* Tab 2: Escape Room (Ruangan & Gembok) */}
@@ -241,7 +241,7 @@ export default function AiGeneratorModal({
             }}
           >
             <Gamepad2 size={18} />
-            <span>🎮 Mode Escape Room (Ruangan & Gembok)</span>
+            <span>Mode Escape Room (Ruangan & Gembok)</span>
           </button>
         </div>
 
@@ -578,7 +578,7 @@ export default function AiGeneratorModal({
                   }}
                 >
                   <Sparkles size={18} />
-                  <span>{loading ? 'AI Sedang Merancang Soal...' : isRace ? `🏎️ Generate ${questionCount} Soal Balap` : `🎮 Generate ${roomCount} Ruangan`}</span>
+                  <span>{loading ? 'AI Sedang Merancang Soal...' : isRace ? `Generate ${questionCount} Soal Balap` : `Generate ${roomCount} Ruangan`}</span>
                 </button>
               </div>
             </form>
