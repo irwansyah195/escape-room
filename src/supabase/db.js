@@ -186,7 +186,10 @@ export async function saveRaceQuestionsToDb(questions) {
 // ====================================================================
 
 export async function saveStudentRecordToDb(record) {
-  const resultId = `res_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const cleanPin = record.sessionPin ? String(record.sessionPin).trim() : 'solo';
+  const cleanNim = (record.nim || record.nama || record.name || 'anon').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+  // Gunakan ID deterministik per sesi & per mahasiswa agar tidak terduplikasi saat re-submit
+  const resultId = `res_${cleanPin}_${cleanNim}`;
   const answersList = Array.isArray(record.answers) ? record.answers : (Array.isArray(record.answersRecord) ? record.answersRecord : []);
   const correctCount = typeof record.correct === 'number' ? record.correct : (typeof record.totalCorrect === 'number' ? record.totalCorrect : answersList.filter(a => a.isSolved).length);
   const totalCount = typeof record.totalLocks === 'number' ? record.totalLocks : (typeof record.totalQuestions === 'number' ? record.totalQuestions : (answersList.length || 20));
@@ -210,17 +213,18 @@ export async function saveStudentRecordToDb(record) {
     created_at: timeStampIso
   };
 
-  // Simpan ke local cache
+  // Simpan ke local cache (replace jika id sama)
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_RESULTS_KEY);
-    const list = raw ? JSON.parse(raw) : [];
+    let list = raw ? JSON.parse(raw) : [];
+    list = list.filter(item => item.id !== resultId);
     list.unshift({
       ...payload,
       nama: payload.name,
-      correct: correctCount,
-      totalCorrect: correctCount,
-      totalLocks: totalCount,
-      totalQuestions: totalCount,
+      correct: safeCorrect,
+      totalCorrect: safeCorrect,
+      totalLocks: safeTotal,
+      totalQuestions: safeTotal,
       answers: answersList,
       answersRecord: answersList,
       timestamp: timeStampIso,
@@ -232,7 +236,7 @@ export async function saveStudentRecordToDb(record) {
 
   if (isSupabaseConfigured && supabase) {
     try {
-      const { error } = await supabase.from('student_results').insert([payload]);
+      const { error } = await supabase.from('student_results').upsert([payload]);
       if (error) throw error;
       return { success: true, id: resultId };
     } catch (e) {

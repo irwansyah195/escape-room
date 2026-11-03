@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import SkyBackground from '../components/common/SkyBackground';
 import Header from '../components/common/Header';
@@ -90,6 +90,45 @@ export default function GamePage({ rooms, loadingRooms }) {
   const totalLocks = rooms.reduce((acc, r) => acc + (r.locks || []).length, 0);
   const perLockMax = totalLocks > 0 ? 100 / totalLocks : 0;
 
+  // Ref penahan agar hasil pertandingan tidak tersimpan berkali-kali (anti duplikat)
+  const hasSavedResultRef = useRef(false);
+  const totalScoreRef = useRef(totalScore);
+  const totalCorrectRef = useRef(totalCorrect);
+  const answersRecordRef = useRef(answersRecord);
+
+  useEffect(() => {
+    totalScoreRef.current = totalScore;
+  }, [totalScore]);
+
+  useEffect(() => {
+    totalCorrectRef.current = totalCorrect;
+  }, [totalCorrect]);
+
+  useEffect(() => {
+    answersRecordRef.current = answersRecord;
+  }, [answersRecord]);
+
+  const saveStudentResultOnce = useCallback((override = {}) => {
+    if (hasSavedResultRef.current) return;
+    hasSavedResultRef.current = true;
+
+    saveStudentResult({
+      nama: student?.name,
+      name: student?.name,
+      nim: student?.nim || '-',
+      score: override.score !== undefined ? override.score : totalScoreRef.current,
+      correct: override.correct !== undefined ? override.correct : totalCorrectRef.current,
+      totalCorrect: override.correct !== undefined ? override.correct : totalCorrectRef.current,
+      totalLocks: isRaceMode ? totalRaceQuestions : (totalLocks || 20),
+      totalQuestions: isRaceMode ? totalRaceQuestions : (totalLocks || 20),
+      sessionMode: isRaceMode ? 'quiz_race' : 'escape_room',
+      sessionPin: student?.sessionPin || null,
+      answers: override.answers || answersRecordRef.current || [],
+      answersRecord: override.answers || answersRecordRef.current || [],
+      timestamp: new Date().toISOString()
+    });
+  }, [student, isRaceMode, totalRaceQuestions, totalLocks]);
+
   // Simpan progres ke sessionStorage setiap kali state berubah agar tahan refresh (F5)
   useEffect(() => {
     if (student) {
@@ -159,21 +198,7 @@ export default function GamePage({ rooms, loadingRooms }) {
         if (session.status === 'finished') {
           setIsFinished(true);
           setShowPodium(true);
-          saveStudentResult({
-            nama: student.name,
-            name: student.name,
-            nim: student.nim || '-',
-            score: totalScore,
-            correct: totalCorrect,
-            totalCorrect: totalCorrect,
-            totalLocks: isRaceMode ? totalRaceQuestions : (totalLocks || 20),
-            totalQuestions: isRaceMode ? totalRaceQuestions : (totalLocks || 20),
-            sessionMode: isRaceMode ? 'quiz_race' : 'escape_room',
-            sessionPin: student.sessionPin || null,
-            answers: answersRecord || [],
-            answersRecord: answersRecord || [],
-            timestamp: new Date().toISOString()
-          });
+          saveStudentResultOnce();
         }
       }
     });
@@ -326,22 +351,12 @@ export default function GamePage({ rooms, loadingRooms }) {
 
       const isCompleted = nextIdx >= totalRaceQuestions;
 
-      // Jika balapan telah selesai, otomatis simpan ke database rekap nilai
+      // Jika balapan telah selesai, otomatis simpan ke database rekap nilai (anti-duplikat)
       if (isCompleted) {
-        saveStudentResult({
-          nama: student.name,
-          name: student.name,
-          nim: student.nim || '-',
+        saveStudentResultOnce({
           score: newScore,
           correct: newCorrect,
-          totalCorrect: newCorrect,
-          totalLocks: totalRaceQuestions,
-          totalQuestions: totalRaceQuestions,
-          sessionMode: 'quiz_race',
-          sessionPin: student.sessionPin || null,
-          answers: updatedAnswersList,
-          answersRecord: updatedAnswersList,
-          timestamp: new Date().toISOString()
+          answers: updatedAnswersList
         });
       }
 
@@ -420,20 +435,10 @@ export default function GamePage({ rooms, loadingRooms }) {
     setAnswersRecord(updatedTimeoutList);
 
     if (isCompleted) {
-      saveStudentResult({
-        nama: student.name,
-        name: student.name,
-        nim: student.nim || '-',
+      saveStudentResultOnce({
         score: totalScore,
         correct: totalCorrect,
-        totalCorrect: totalCorrect,
-        totalLocks: totalRaceQuestions,
-        totalQuestions: totalRaceQuestions,
-        sessionMode: 'quiz_race',
-        sessionPin: student.sessionPin || null,
-        answers: updatedTimeoutList,
-        answersRecord: updatedTimeoutList,
-        timestamp: new Date().toISOString()
+        answers: updatedTimeoutList
       });
     }
 
@@ -493,6 +498,7 @@ export default function GamePage({ rooms, loadingRooms }) {
 
     if (currentRoomIdx >= rooms.length - 1) {
       setIsFinished(true);
+      saveStudentResultOnce();
     } else {
       setCurrentRoomIdx(prev => prev + 1);
     }
@@ -506,6 +512,7 @@ export default function GamePage({ rooms, loadingRooms }) {
 
   // Handler Restart Permainan / Keluar Sesi
   const handleRestart = () => {
+    hasSavedResultRef.current = false;
     if (student?.sessionPin && student?.sessionId) {
       leaveClassSession(student.sessionPin, student.sessionId);
     }
