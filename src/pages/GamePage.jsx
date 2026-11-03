@@ -219,7 +219,8 @@ export default function GamePage({ rooms, loadingRooms }) {
         characterColor: student.characterColor || 'blue',
         score: totalScore,
         solvedCount: totalCorrect,
-        checkpointIdx: raceQuestionIdx,
+        checkpointIdx: isRaceMode && isFinished ? totalRaceQuestions : raceQuestionIdx,
+        progressIdx: isRaceMode && isFinished ? totalRaceQuestions : raceQuestionIdx,
         totalQuestions: isRaceMode ? totalRaceQuestions : (totalLocks || 1),
         isFinished: isFinished,
         lastSeen: Date.now()
@@ -379,11 +380,10 @@ export default function GamePage({ rooms, loadingRooms }) {
         setRaceFeedback(null);
         setRaceWrongAttempts(0);
         setRaceDisabledOptions(new Set());
+        setRaceQuestionIdx(nextIdx);
         if (isCompleted) {
           setIsFinished(true);
           setShowPodium(true);
-        } else {
-          setRaceQuestionIdx(nextIdx);
         }
       }, 800);
 
@@ -459,11 +459,10 @@ export default function GamePage({ rooms, loadingRooms }) {
       setRaceFeedback(null);
       setRaceWrongAttempts(0);
       setRaceDisabledOptions(new Set());
+      setRaceQuestionIdx(nextIdx);
       if (isCompleted) {
         setIsFinished(true);
         setShowPodium(true);
-      } else {
-        setRaceQuestionIdx(nextIdx);
       }
     }, 1200);
   };

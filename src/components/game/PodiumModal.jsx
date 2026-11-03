@@ -10,7 +10,9 @@ export default function PodiumModal({ players, onClose, isDosen = false }) {
   // 2. Jika belum finish, berdasarkan soal terbanyak & skor tertinggi
   const sortedRacers = [...playersList].sort((a, b) => {
     if (a.isFinished && b.isFinished) {
-      return (a.finishRank || 99) - (b.finishRank || 99);
+      const rankDiff = (a.finishRank || 99) - (b.finishRank || 99);
+      if (rankDiff !== 0) return rankDiff;
+      return (b.score || 0) - (a.score || 0);
     }
     if (a.isFinished) return -1;
     if (b.isFinished) return 1;

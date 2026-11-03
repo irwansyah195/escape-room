@@ -120,7 +120,8 @@ export default class SprintRaceScene extends Phaser.Scene {
 
       // Hitung posisi X berdasarkan progres soal
       const totalQ = player.totalQuestions || this.totalQuestions || 1;
-      const progress = Math.min(1, Math.max(0, (player.progressIdx || player.solvedCount || 0) / totalQ));
+      const effectiveProgress = player.isFinished ? totalQ : (player.progressIdx || player.solvedCount || 0);
+      const progress = Math.min(1, Math.max(0, effectiveProgress / totalQ));
       const targetX = this.startX + progress * this.sprintDistance;
 
       let entity = this.racerEntities.get(uid);
@@ -194,7 +195,8 @@ export default class SprintRaceScene extends Phaser.Scene {
 
       // Update Teks Progres
       if (player.isFinished) {
-        entity.progressBadge.setText(`🏁 FINISH #${player.finishRank || '1'}`);
+        const displayRank = (player.finishRank && player.finishRank < 99) ? player.finishRank : 1;
+        entity.progressBadge.setText(`🏁 FINISH #${displayRank}`);
         entity.progressBadge.setColor('#4ade80');
       } else {
         const currentQ = Math.min(totalQ, (player.progressIdx || 0) + 1);

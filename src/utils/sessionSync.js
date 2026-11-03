@@ -752,7 +752,19 @@ export async function updatePlayerProgress(pin, uid, progress) {
   }
 
   if (sessionPlayers && sessionPlayers.has(uid)) {
-    const updated = { ...sessionPlayers.get(uid), ...progress, lastSeen: now };
+    const existing = sessionPlayers.get(uid);
+    let computedRank = progress.finishRank ?? existing?.finishRank;
+    if (progress.isFinished === true && (!computedRank || computedRank >= 99)) {
+      let alreadyFinished = 0;
+      sessionPlayers.forEach((p, k) => {
+        if (k !== uid && p?.isFinished && p?.finishRank > 0 && p?.finishRank < 99) {
+          alreadyFinished++;
+        }
+      });
+      computedRank = alreadyFinished + 1;
+      progress.finishRank = computedRank;
+    }
+    const updated = { ...existing, ...progress, lastSeen: now };
     sessionPlayers.set(uid, updated);
     savePlayersToStorage(pin, sessionPlayers);
   }
@@ -774,10 +786,37 @@ export async function updatePlayerProgress(pin, uid, progress) {
       if (progress.score !== undefined) sbData.score = Math.round(Number(progress.score) || 0);
       if (progress.solvedCount !== undefined) sbData.solved_count = Math.round(Number(progress.solvedCount) || 0);
       if (progress.checkpointIdx !== undefined) sbData.progress_idx = Math.round(Number(progress.checkpointIdx) || 0);
+      // progressIdx (posisi soal balapan) harus ikut tersimpan & tidak boleh ditimpa nilai lama
+      if (progress.progressIdx !== undefined) sbData.progress_idx = Math.round(Number(progress.progressIdx) || 0);
       if (progress.characterType !== undefined) sbData.character_type = progress.characterType;
       if (progress.characterColor !== undefined) sbData.character_color = progress.characterColor;
       if (progress.isFinished !== undefined) sbData.is_finished = progress.isFinished;
       if (progress.finishRank !== undefined) sbData.finish_rank = Math.round(Number(progress.finishRank) || 0);
+
+      // Tentukan peringkat finish otomatis (urutan selesai) jika belum punya peringkat valid
+      if (progress.isFinished === true && (!progress.finishRank || progress.finishRank >= 99)) {
+        const { data: me } = await supabase
+          .from('session_players')
+          .select('is_finished, finish_rank')
+          .eq('id', `${pin}_${uid}`)
+          .maybeSingle();
+        const hasValidRank = me?.is_finished && me?.finish_rank > 0 && me?.finish_rank < 99;
+        if (!hasValidRank) {
+          const { count } = await supabase
+            .from('session_players')
+            .select('id', { count: 'exact', head: true })
+            .eq('session_pin', pin)
+            .eq('is_finished', true)
+            .gt('finish_rank', 0)
+            .lt('finish_rank', 99)
+            .neq('id', `${pin}_${uid}`);
+          sbData.finish_rank = (count || 0) + 1;
+          progress.finishRank = sbData.finish_rank;
+        } else {
+          sbData.finish_rank = me.finish_rank;
+          progress.finishRank = me.finish_rank;
+        }
+      }
 
       await supabase.from('session_players').update(sbData).eq('id', `${pin}_${uid}`);
     } catch (err) {}

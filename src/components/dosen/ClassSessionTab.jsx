@@ -269,7 +269,9 @@ export default function ClassSessionTab({ rooms }) {
   // Urutkan peringkat live untuk leaderboard
   const sortedLeaderboard = [...playersList].sort((a, b) => {
     if (a.isFinished && b.isFinished) {
-      return (a.finishRank || 99) - (b.finishRank || 99);
+      const rankDiff = (a.finishRank || 99) - (b.finishRank || 99);
+      if (rankDiff !== 0) return rankDiff;
+      return (b.score || 0) - (a.score || 0);
     }
     if (a.isFinished) return -1;
     if (b.isFinished) return 1;
@@ -863,8 +865,13 @@ export default function ClassSessionTab({ rooms }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {sortedLeaderboard.map((player, idx) => {
                     const isTop1 = idx === 0 && (player.progressIdx || 0) > 0;
-                    const progressCount = player.progressIdx || player.solvedCount || 0;
+                    const progressCount = player.isFinished
+                      ? totalQuestions
+                      : (player.progressIdx || player.solvedCount || 0);
                     const progressPercent = Math.min(100, Math.round((progressCount / totalQuestions) * 100));
+                    const displayFinishRank = (player.finishRank && player.finishRank < 99)
+                      ? player.finishRank
+                      : (idx + 1);
 
                     return (
                       <div
@@ -950,7 +957,7 @@ export default function ClassSessionTab({ rooms }) {
                             border: `1px solid ${player.isFinished ? 'rgba(34, 197, 94, 0.4)' : 'rgba(56, 189, 248, 0.4)'}`,
                             color: player.isFinished ? '#4ade80' : '#38bdf8'
                           }}>
-                            {player.isFinished ? `🏁 FINISH #${player.finishRank || '1'}` : '🏎️ RACING'}
+                            {player.isFinished ? `🏁 FINISH #${displayFinishRank}` : '🏎️ RACING'}
                           </div>
                         </div>
                       </div>
