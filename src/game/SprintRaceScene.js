@@ -114,6 +114,20 @@ export default class SprintRaceScene extends Phaser.Scene {
     const totalHeightRequired = Math.max(canvasHeight, playerList.length * laneHeight + 60);
     this.cameras.main.setBounds(0, 0, this.trackWidth, totalHeightRequired);
 
+    // Hitung urutan peringkat unik bagi seluruh pemain yang sudah finish
+    const finishedSorted = [...playerList]
+      .filter(p => p.isFinished)
+      .sort((a, b) => {
+        const rankDiff = (a.finishRank || 99) - (b.finishRank || 99);
+        if (rankDiff !== 0) return rankDiff;
+        return (b.score || 0) - (a.score || 0);
+      });
+    const uniqueFinishRankMap = new Map();
+    finishedSorted.forEach((p, rIdx) => {
+      const pUid = p.uid || p.sessionId;
+      if (pUid) uniqueFinishRankMap.set(pUid, rIdx + 1);
+    });
+
     playerList.forEach((player, idx) => {
       const uid = player.uid || player.sessionId || `player-${idx}`;
       const laneY = 50 + idx * laneHeight + laneHeight / 2;
@@ -195,7 +209,7 @@ export default class SprintRaceScene extends Phaser.Scene {
 
       // Update Teks Progres
       if (player.isFinished) {
-        const displayRank = (player.finishRank && player.finishRank < 99) ? player.finishRank : 1;
+        const displayRank = uniqueFinishRankMap.get(uid) || ((player.finishRank && player.finishRank < 99) ? player.finishRank : 1);
         entity.progressBadge.setText(`🏁 FINISH #${displayRank}`);
         entity.progressBadge.setColor('#4ade80');
       } else {

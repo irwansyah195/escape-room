@@ -875,9 +875,8 @@ export default function ClassSessionTab({ rooms }) {
                       ? totalQuestions
                       : (player.progressIdx || player.solvedCount || 0);
                     const progressPercent = Math.min(100, Math.round((progressCount / totalQuestions) * 100));
-                    const displayFinishRank = (player.finishRank && player.finishRank < 99)
-                      ? player.finishRank
-                      : (idx + 1);
+                    // Gunakan urutan baris di papan peringkat yang sudah diurutkan (idx + 1) agar selalu unik (#1, #2, #3...)
+                    const displayFinishRank = idx + 1;
 
                     return (
                       <div

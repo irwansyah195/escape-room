@@ -751,6 +751,7 @@ export async function updatePlayerProgress(pin, uid, progress) {
     localPlayersMap.set(pin, sessionPlayers);
   }
 
+  // Simpan di memori lokal & localStorage terlebih dahulu (untuk respons cepat UI lokal)
   if (sessionPlayers && sessionPlayers.has(uid)) {
     const existing = sessionPlayers.get(uid);
     let computedRank = progress.finishRank ?? existing?.finishRank;
@@ -762,21 +763,18 @@ export async function updatePlayerProgress(pin, uid, progress) {
         }
       });
       computedRank = alreadyFinished + 1;
-      progress.finishRank = computedRank;
     }
-    const updated = { ...existing, ...progress, lastSeen: now };
+    const updated = {
+      ...existing,
+      ...progress,
+      ...(computedRank ? { finishRank: computedRank } : {}),
+      lastSeen: now
+    };
     sessionPlayers.set(uid, updated);
     savePlayersToStorage(pin, sessionPlayers);
   }
 
-  if (localBus) {
-    localBus.postMessage({
-      type: 'PLAYER_UPDATE',
-      payload: { pin, uid, data: { ...progress, lastSeen: now } }
-    });
-  }
-
-  // Update ke Supabase
+  // Update ke Supabase (Sumber Kebenaran Utama untuk urutan finish lintas perangkat!)
   if (isSupabaseConfigured && supabase && pin && uid) {
     try {
       const sbData = {
@@ -791,35 +789,48 @@ export async function updatePlayerProgress(pin, uid, progress) {
       if (progress.characterType !== undefined) sbData.character_type = progress.characterType;
       if (progress.characterColor !== undefined) sbData.character_color = progress.characterColor;
       if (progress.isFinished !== undefined) sbData.is_finished = progress.isFinished;
-      if (progress.finishRank !== undefined) sbData.finish_rank = Math.round(Number(progress.finishRank) || 0);
 
-      // Tentukan peringkat finish otomatis (urutan selesai) jika belum punya peringkat valid
-      if (progress.isFinished === true && (!progress.finishRank || progress.finishRank >= 99)) {
-        const { data: me } = await supabase
-          .from('session_players')
-          .select('is_finished, finish_rank')
-          .eq('id', `${pin}_${uid}`)
-          .maybeSingle();
-        const hasValidRank = me?.is_finished && me?.finish_rank > 0 && me?.finish_rank < 99;
-        if (!hasValidRank) {
-          const { count } = await supabase
-            .from('session_players')
-            .select('id', { count: 'exact', head: true })
-            .eq('session_pin', pin)
-            .eq('is_finished', true)
-            .gt('finish_rank', 0)
-            .lt('finish_rank', 99)
-            .neq('id', `${pin}_${uid}`);
-          sbData.finish_rank = (count || 0) + 1;
-          progress.finishRank = sbData.finish_rank;
+      // Hitung peringkat finish langsung dari tabel Supabase agar tidak semua jadi #1 karena memori lokal kosong!
+      if (progress.isFinished === true) {
+        if (progress.finishRank !== undefined && progress.finishRank > 0 && progress.finishRank < 99) {
+          sbData.finish_rank = Math.round(Number(progress.finishRank));
         } else {
-          sbData.finish_rank = me.finish_rank;
-          progress.finishRank = me.finish_rank;
+          const { data: me } = await supabase
+            .from('session_players')
+            .select('is_finished, finish_rank')
+            .eq('id', `${pin}_${uid}`)
+            .maybeSingle();
+          const hasValidRank = me?.is_finished && me?.finish_rank > 0 && me?.finish_rank < 99;
+          if (!hasValidRank) {
+            const { count } = await supabase
+              .from('session_players')
+              .select('id', { count: 'exact', head: true })
+              .eq('session_pin', pin)
+              .eq('is_finished', true)
+              .gt('finish_rank', 0)
+              .lt('finish_rank', 99)
+              .neq('id', `${pin}_${uid}`);
+            sbData.finish_rank = (count || 0) + 1;
+          } else {
+            sbData.finish_rank = me.finish_rank;
+          }
+        }
+        progress.finishRank = sbData.finish_rank;
+        if (sessionPlayers && sessionPlayers.has(uid)) {
+          sessionPlayers.set(uid, { ...sessionPlayers.get(uid), finishRank: sbData.finish_rank });
+          savePlayersToStorage(pin, sessionPlayers);
         }
       }
 
       await supabase.from('session_players').update(sbData).eq('id', `${pin}_${uid}`);
     } catch (err) {}
+  }
+
+  if (localBus) {
+    localBus.postMessage({
+      type: 'PLAYER_UPDATE',
+      payload: { pin, uid, data: { ...progress, lastSeen: now } }
+    });
   }
 
   const sbChannel = getSupabaseChannel(pin);
@@ -890,7 +901,12 @@ export function subscribeToSessionPlayers(pin, callback) {
               // Hanya terima pemain yang aktif dalam 60 detik terakhir
               if (!rowLastSeen || (now - rowLastSeen <= STALE_TIMEOUT_MS)) {
                 const existing = sessionPlayers?.get(row.uid);
-                if (!existing || rowLastSeen >= (existing.lastSeen || 0)) {
+                // Selalu sinkronkan dari Supabase bila data baru atau ketika status finish / finish_rank berubah
+                if (
+                  !existing ||
+                  rowLastSeen >= (existing.lastSeen || 0) ||
+                  (row.is_finished && (!existing.isFinished || existing.finishRank !== row.finish_rank))
+                ) {
                   sessionPlayers?.set(row.uid, {
                     uid: row.uid,
                     name: row.name,
@@ -903,6 +919,7 @@ export function subscribeToSessionPlayers(pin, callback) {
                     totalQuestions: row.total_questions,
                     isFinished: row.is_finished,
                     finishRank: row.finish_rank,
+                    updatedAt: row.updated_at,
                     lastSeen: rowLastSeen || now
                   });
                   changed = true;
