@@ -116,8 +116,8 @@ ATURAN KHUSUS:
     return generateLocalFallbackRooms({ topic, difficulty, roomCount, locksPerRoom });
   }
 
-  // Model candidate priority: gemini-3.5-flash-lite (sangat cepat & stabil) lalu gemini-3.5-flash
-  const candidateModels = ['gemini-3.5-flash-lite', 'gemini-3.5-flash'];
+  // Model candidate priority: gemini-2.5-flash, gemini-1.5-flash, gemini-2.0-flash, dll
+  const candidateModels = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.5-flash'];
   let lastError = null;
   let rawText = null;
 
@@ -130,7 +130,7 @@ ATURAN KHUSUS:
     ],
     generationConfig: {
       temperature: 0.7,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 8192,
       responseMimeType: "application/json"
     }
   };
@@ -389,7 +389,7 @@ Struktur data JSON wajib persis seperti ini:
     return generateLocalFallbackRaceQuestions({ topic, difficulty, questionCount });
   }
 
-  const candidateModels = ['gemini-3.5-flash-lite', 'gemini-3.5-flash'];
+  const candidateModels = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.5-flash'];
   let lastError = null;
   let rawText = null;
 
@@ -402,7 +402,7 @@ Struktur data JSON wajib persis seperti ini:
     ],
     generationConfig: {
       temperature: 0.7,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 8192,
       responseMimeType: "application/json"
     }
   };

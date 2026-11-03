@@ -370,22 +370,74 @@ export default function AiGeneratorModal({
                     <label className="form-label" style={{ margin: 0, color: '#fbbf24', fontWeight: 800 }}>
                       🏁 Jumlah Butir Soal Balapan
                     </label>
-                    <span style={{ fontSize: '1.2em', fontWeight: 900, color: '#fbbf24' }}>
-                      {questionCount} Soal
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input
+                        type="number"
+                        min={3}
+                        max={35}
+                        value={questionCount}
+                        onChange={(e) => {
+                          const val = Math.max(3, Math.min(35, Number(e.target.value) || 3));
+                          setQuestionCount(val);
+                        }}
+                        className="form-input"
+                        style={{ width: '70px', padding: '4px 8px', textAlign: 'center', fontWeight: 900, color: '#fbbf24', fontSize: '1.1em' }}
+                      />
+                      <span style={{ fontSize: '0.95em', fontWeight: 800, color: '#fbbf24' }}>
+                        Soal (Maks: 35)
+                      </span>
+                    </div>
                   </div>
                   <input
                     type="range"
                     min={3}
-                    max={20}
+                    max={35}
                     value={questionCount}
                     onChange={(e) => setQuestionCount(Number(e.target.value))}
                     style={{ width: '100%', accentColor: '#f59e0b', cursor: 'pointer' }}
                   />
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75em', color: '#94a3b8', marginTop: '4px' }}>
                     <span>Sprint Pendek (3 Soal)</span>
-                    <span>Standar (10 Soal)</span>
-                    <span>Maraton (20 Soal)</span>
+                    <span>Standar (15 Soal)</span>
+                    <span>Panjang (25 Soal)</span>
+                    <span>Maksimal (35 Soal)</span>
+                  </div>
+
+                  {/* Preset Pilihan Cepat */}
+                  <div style={{ display: 'flex', gap: '6px', marginTop: '12px', flexWrap: 'wrap' }}>
+                    {[5, 10, 15, 20, 25, 30, 35].map(cnt => (
+                      <button
+                        key={cnt}
+                        type="button"
+                        onClick={() => setQuestionCount(cnt)}
+                        style={{
+                          background: questionCount === cnt ? '#f59e0b' : 'rgba(245, 158, 11, 0.15)',
+                          color: questionCount === cnt ? '#1e1b4b' : '#fcd34d',
+                          border: `1px solid ${questionCount === cnt ? '#f59e0b' : 'rgba(245, 158, 11, 0.4)'}`,
+                          borderRadius: '8px',
+                          padding: '4px 10px',
+                          fontSize: '0.8em',
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {cnt} Soal
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Info Skor Dinamis */}
+                  <div style={{
+                    marginTop: '12px',
+                    fontSize: '0.82em',
+                    color: '#fde68a',
+                    background: 'rgba(245, 158, 11, 0.1)',
+                    border: '1px dashed rgba(245, 158, 11, 0.35)',
+                    padding: '8px 12px',
+                    borderRadius: '10px'
+                  }}>
+                    💡 <b>Skor Dinamis:</b> Setiap soal bernilai <b>{(100 / (questionCount || 1)).toFixed(2)} Poin</b> (Total akumulasi jika semua benar = <b>100 Poin Maksimal</b>).
                   </div>
                 </div>
               ) : (
@@ -414,6 +466,8 @@ export default function AiGeneratorModal({
                       <option value={3}>3 Ruangan (Standar)</option>
                       <option value={4}>4 Ruangan</option>
                       <option value={5}>5 Ruangan</option>
+                      <option value={6}>6 Ruangan</option>
+                      <option value={7}>7 Ruangan (Maksimal)</option>
                     </select>
                   </div>
 
@@ -430,7 +484,20 @@ export default function AiGeneratorModal({
                       <option value={2}>2 Gembok Soal (Standar)</option>
                       <option value={3}>3 Gembok Soal</option>
                       <option value={4}>4 Gembok Soal</option>
+                      <option value={5}>5 Gembok Soal (Maksimal)</option>
                     </select>
+                  </div>
+
+                  <div style={{
+                    gridColumn: '1 / -1',
+                    fontSize: '0.82em',
+                    color: '#e9d5ff',
+                    background: 'rgba(168, 85, 247, 0.1)',
+                    border: '1px dashed rgba(168, 85, 247, 0.35)',
+                    padding: '8px 12px',
+                    borderRadius: '10px'
+                  }}>
+                    💡 <b>Skor Dinamis:</b> Total {roomCount * locksPerRoom} gembok soal (masing-masing bernilai <b>{(100 / (roomCount * locksPerRoom || 1)).toFixed(2)} Poin</b> untuk total <b>100 Poin Maksimal</b>).
                   </div>
                 </div>
               )}

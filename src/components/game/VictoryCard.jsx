@@ -16,7 +16,7 @@ export default function VictoryCard({
   const [saveStatus, setSaveStatus] = useState({ loading: true, success: false, msg: 'Menyimpan hasil ke database...' });
   const hasSubmittedRef = useRef(false);
 
-  const scoreRounded = Math.round(totalScore * 100) / 100;
+  const scoreRounded = Math.min(100, Math.round(totalScore * 100) / 100);
 
   useEffect(() => {
     // Jalankan efek selebrasi confetti
@@ -111,7 +111,7 @@ export default function VictoryCard({
       </div>
 
       <p style={{ fontSize: '1.05em', margin: '14px 0', color: '#e2e8f0' }}>
-        Kamu menjawab benar <b>{totalCorrect} dari {totalLocks}</b> gembok (skor dipengaruhi jumlah percobaan tiap soal).
+        Kamu menjawab benar <b>{totalCorrect} dari {totalLocks}</b> {student?.sessionMode === 'quiz_race' ? 'soal' : 'gembok'} (skor dipengaruhi jumlah percobaan tiap soal).
       </p>
 
       {/* Ringkasan Pembelajaran */}
