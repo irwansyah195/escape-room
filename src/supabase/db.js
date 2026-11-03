@@ -213,30 +213,40 @@ export async function saveStudentRecordToDb(record) {
     created_at: timeStampIso
   };
 
+  // Jika data masuk tidak membawa rincian jawaban (mis. arsip otomatis dari sisi dosen),
+  // JANGAN menimpa rekaman mahasiswa yang sudah memiliki rincian jawaban.
+  const hasAnswers = answersList.length > 0;
+
   // Simpan ke local cache (replace jika id sama)
   try {
     const raw = localStorage.getItem(LOCAL_STORAGE_RESULTS_KEY);
     let list = raw ? JSON.parse(raw) : [];
-    list = list.filter(item => item.id !== resultId);
-    list.unshift({
-      ...payload,
-      nama: payload.name,
-      correct: safeCorrect,
-      totalCorrect: safeCorrect,
-      totalLocks: safeTotal,
-      totalQuestions: safeTotal,
-      answers: answersList,
-      answersRecord: answersList,
-      timestamp: timeStampIso,
-      submittedAt: timeStampIso,
-      createdAt: new Date(timeStampIso)
-    });
-    localStorage.setItem(LOCAL_STORAGE_RESULTS_KEY, JSON.stringify(list));
+    const existingLocal = list.find(item => item.id === resultId);
+    const existingHasAnswers = existingLocal && Array.isArray(existingLocal.answers) && existingLocal.answers.length > 0;
+    if (hasAnswers || !existingLocal || !existingHasAnswers) {
+      list = list.filter(item => item.id !== resultId);
+      list.unshift({
+        ...payload,
+        nama: payload.name,
+        correct: safeCorrect,
+        totalCorrect: safeCorrect,
+        totalLocks: safeTotal,
+        totalQuestions: safeTotal,
+        answers: answersList,
+        answersRecord: answersList,
+        timestamp: timeStampIso,
+        submittedAt: timeStampIso,
+        createdAt: new Date(timeStampIso)
+      });
+      localStorage.setItem(LOCAL_STORAGE_RESULTS_KEY, JSON.stringify(list));
+    }
   } catch {}
 
   if (isSupabaseConfigured && supabase) {
     try {
-      const { error } = await supabase.from('student_results').upsert([payload]);
+      const { error } = await supabase
+        .from('student_results')
+        .upsert([payload], hasAnswers ? undefined : { ignoreDuplicates: true });
       if (error) throw error;
       return { success: true, id: resultId };
     } catch (e) {
